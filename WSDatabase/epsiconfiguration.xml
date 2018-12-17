@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<epsi.config>
+  <logger>
+    <appender>
+      <textfile value="I:\Siteweb\Logs\logs_%d.txt" />
+      <mail value="admin.reseau@montpellier-epsi.fr" />
+    </appender>
+  </logger>
+
+  <logs>
+    <useLogs value="true" />
+  </logs>
+
+  <database>
+    <fake value="0" />
+
+    <server>
+      <sqlserver>
+        <connectionstring value="server={0};uid=extranetUser;pwd=citK19c3;database=ServiceEPSI_SQLServer;Connect Timeout=10" />
+      </sqlserver>
+      <mysql>
+        <connectionstring value="server={0};user=root;password=dbZ51aY;database=mysql;port=3306;" />
+      </mysql>
+      <oracle>
+        <connectionstring value="user id=SYS; password=dbZ51#aY;DBA Privilege=SYSDBA;data source=(DESCRIPTION =(ADDRESS = (PROTOCOL = TCP)(HOST = {0})(PORT = 1521))(CONNECT_DATA = (SID = bdaolap)))" />
+      </oracle>
+    </server>
+  </database>
+
+  <gmail>
+    <user>
+      <login value="intranet.montpellier@epsi.fr" />
+      <password value="NE#2EFbn" />
+    </user>
+  </gmail>
+</epsi.config>
+
