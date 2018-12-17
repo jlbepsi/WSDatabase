@@ -22,6 +22,7 @@ namespace EpsiLibrary2019.DataAccess
 
         public override bool TestUserConnection(string databaseName, string sqlLogin, string password)
         {
+            /* TODO : A Refaire Oracle management */
             string connectionString = string.Format("server={0};user={1};password={2};database={3};port=3306;",
                                                     this.connection.DataSource, sqlLogin, password, databaseName);
 
