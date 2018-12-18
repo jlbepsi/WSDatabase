@@ -99,7 +99,6 @@ namespace EpsiLibrary2019.DataAccess
             catch (MySqlException ex)
             {
                 LogManager.GetLogger().Error(ex);
-
                 throw new DatabaseException(ex.Message);
             }
             finally

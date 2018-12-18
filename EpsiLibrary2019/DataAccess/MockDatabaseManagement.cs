@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace EpsiLibrary2019.DataAccess
 {
-    public class FakeDatabaseManagement : DatabaseManagement
+    public class MockDatabaseManagement : DatabaseManagement
     {
         #region Builders
-        public FakeDatabaseManagement(string connectionString)
-            : base(connectionString)
+        public MockDatabaseManagement()
+            : base("")
         {
         }
         #endregion

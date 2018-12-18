@@ -12,7 +12,7 @@
   </logs>
 
   <database>
-    <fake value="0" />
+    <mock value="0" />
 
     <server>
       <sqlserver>

@@ -8,6 +8,7 @@ namespace EpsiLibrary2019.DataAccess
 {
     public class DatabaseValues
     {
+        public const int DBMOCK_TYPE = 0;
         public const int MYSQL_TYPE = 1;
         public const int SQLSERVER_TYPE = 2;
         public const int ORACLE_TYPE = 3;

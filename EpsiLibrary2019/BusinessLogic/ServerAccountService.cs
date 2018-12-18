@@ -138,7 +138,7 @@ namespace EpsiLibrary2019.BusinessLogic
                 // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
                 DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.ServerTypeId, databaseServerName.IPLocale);
                 // Modification du mot de passe du login SQL sur le serveur
-                management.RemoveUser(databaseServerUser.SqlLogin);
+                management.RemoveUser(userLogin);
             }
             catch (Exception ex)
             {

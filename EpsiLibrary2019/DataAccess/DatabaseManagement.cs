@@ -80,9 +80,9 @@ namespace EpsiLibrary2019.DataAccess
         public static DatabaseManagement CreateDatabaseManagement(int serverId, string adresseIP)
         {
             EpsiLibrary2019.Utilitaires.ConfigurationManager config = EpsiLibrary2019.Utilitaires.ConfigurationManager.GetConfigurationManager();
-            if (config.GetValue("database.fake") == "1")
+            if (config.GetValue("database.mock") == "1" || serverId == DatabaseValues.DBMOCK_TYPE)
             {
-                return new FakeDatabaseManagement(null);
+                return new MockDatabaseManagement();
             }
 
             if (serverId == DatabaseValues.MYSQL_TYPE)

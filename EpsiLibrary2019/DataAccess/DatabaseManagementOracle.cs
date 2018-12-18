@@ -22,9 +22,8 @@ namespace EpsiLibrary2019.DataAccess
 
         public override bool TestUserConnection(string databaseName, string sqlLogin, string password)
         {
-            /* TODO : A Refaire Oracle management */
-            string connectionString = string.Format("server={0};user={1};password={2};database={3};port=3306;",
-                                                    this.connection.DataSource, sqlLogin, password, databaseName);
+            string connectionString = string.Format("user id={1}; password={2};DBA Privilege=SYSDBA;data source=(DESCRIPTION =(ADDRESS = (PROTOCOL = TCP)(HOST = {0})(PORT = 1521))(CONNECT_DATA = (SID = bdaolap)))",
+                                                    this.connection.DataSource, sqlLogin, password);
 
             bool result = true;
             OracleConnection connectionTest = new OracleConnection(connectionString);
@@ -48,31 +47,11 @@ namespace EpsiLibrary2019.DataAccess
         // Vérifie l'existence d'un utilisateur
         public override bool ExistsSqlLoginInDatabase(string sqlLogin, string databaseName)
         {
-            try
-            {
-                Open();
-                string storeProcedure = "ExistsUserInDB";
-                OracleCommand cmd = new OracleCommand(storeProcedure, GetSqlConnection());
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.Parameters.Add(new OracleParameter("@dbName", databaseName));
-                cmd.Parameters.Add(new OracleParameter("@userName", sqlLogin));
-                OracleParameter exists = cmd.Parameters.Add("@userExists", OracleDbType.Int32);
-                exists.Direction = ParameterDirection.Output;
-
-                cmd.ExecuteNonQuery();
-                return Convert.ToBoolean(exists.Value);
-            }
-            catch (OracleException ex)
-            {
-                LogManager.GetLogger().Error(ex);
-
-                throw new DatabaseException(ex.Message);
-            }
-            finally
-            {
-                Close();
-            }
+            /*
+             * Oracle ne crée pas de BD mais seulement un utilisateur pour le tablespace
+             * 
+             */
+            return false;
         }
 
         // Vérifie l'existence d'un utilisateur
@@ -81,7 +60,7 @@ namespace EpsiLibrary2019.DataAccess
             try
             {
                 Open();
-                string storeProcedure = "ExistsUser";
+                string storeProcedure = "DatabaseExistsUser";
                 OracleCommand cmd = new OracleCommand(storeProcedure, GetSqlConnection());
                 cmd.CommandType = CommandType.StoredProcedure;
 
@@ -90,12 +69,11 @@ namespace EpsiLibrary2019.DataAccess
                 exists.Direction = ParameterDirection.Output;
 
                 cmd.ExecuteNonQuery();
-                return Convert.ToBoolean(exists.Value);
+                return (exists.Value.ToString().Equals("1"));
             }
             catch (OracleException ex)
             {
                 LogManager.GetLogger().Error(ex);
-
                 throw new DatabaseException(ex.Message);
             }
             finally
@@ -109,21 +87,18 @@ namespace EpsiLibrary2019.DataAccess
             try
             {
                 Open();
-                string storeProcedure = "AddOrUpdateUser";
+                string storeProcedure = "DatabaseAddOrUpdateUser";
                 OracleCommand cmd = new OracleCommand(storeProcedure, GetSqlConnection());
                 cmd.CommandType = CommandType.StoredProcedure;
 
-                cmd.Parameters.Add(new OracleParameter("@userName", sqlLogin));
-                cmd.Parameters.Add(new OracleParameter("@userPassword", password));
+                cmd.Parameters.Add(new OracleParameter("@login", sqlLogin));
+                cmd.Parameters.Add(new OracleParameter("@password", password));
 
                 cmd.ExecuteNonQuery();
-
-                InternalExecuteNonQuery(String.Format("GRANT USAGE ON * . * TO '{0}'@'%' IDENTIFIED BY '{1}' WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0 ;", sqlLogin, password));
             }
             catch (OracleException ex)
             {
                 LogManager.GetLogger().Error(ex);
-
                 throw new DatabaseException(ex.Message);
             }
             finally
@@ -134,13 +109,14 @@ namespace EpsiLibrary2019.DataAccess
 
         public override void RemoveUser(string sqlLogin)
         {
-            string storeProcedure = "DropUser";
-            OracleCommand cmd = new OracleCommand(storeProcedure, GetSqlConnection());
-            cmd.CommandType = CommandType.StoredProcedure;
-
             try
             {
-                cmd.Parameters.Add(new OracleParameter("@userName", sqlLogin));
+                Open();
+                string storeProcedure = "DatabaseRemoveUser";
+                OracleCommand cmd = new OracleCommand(storeProcedure, GetSqlConnection());
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.Add(new OracleParameter("@login", sqlLogin));
 
                 cmd.ExecuteNonQuery();
             }
@@ -160,117 +136,38 @@ namespace EpsiLibrary2019.DataAccess
         #region Database Service
         public override bool ExistsDatabase(string databaseName)
         {
-            try
-            {
-                Open();
-                OracleCommand cmd = new OracleCommand("ExistDB", GetSqlConnection());
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.Parameters.Add(new OracleParameter("@dbName", databaseName));
-                OracleParameter exists = cmd.Parameters.Add("@dbExists", OracleDbType.Int32, 11);
-                exists.Direction = ParameterDirection.Output;
-
-                cmd.ExecuteNonQuery();
-
-                return Convert.ToBoolean(exists.Value);
-            }
-            catch (OracleException ex)
-            {
-                LogManager.GetLogger().Error(ex);
-
-                throw new DatabaseException(ex.Message);
-            }
-            finally
-            {
-                Close();
-            }
+            /*
+             * Oracle ne crée pas de BD mais seulement un utilisateur pour le tablespace
+             * 
+             */
+            return false;
         }
 
-        public override int GetDatabaseServerType() { return DatabaseValues.MYSQL_TYPE; }
+        public override int GetDatabaseServerType() { return DatabaseValues.ORACLE_TYPE; }
 
 
         // Liste tous les base de données de l'utilisateur, format renvoyé
         public override List<string> ListDatabases(string sqlLogin)
         {
-            List<string> liste = new List<string>();
-            try
-            {
-                Open();
-
-                string storeProcedure = "ListDatabases";
-                OracleCommand cmd = new OracleCommand(storeProcedure, GetSqlConnection());
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.Parameters.Add(new OracleParameter("@userName", sqlLogin));
-                OracleDataReader reader = cmd.ExecuteReader();
-                if (reader.HasRows)
-                {
-                    while (reader.Read())
-                    {
-                        liste.Add(reader.GetString(0));
-                    }
-                }
-
-            }
-            catch (OracleException ex)
-            {
-                LogManager.GetLogger().Error(ex);
-
-                throw new DatabaseException(ex.Message);
-            }
-            finally
-            {
-                Close();
-            }
-            return liste;
+            return new List<string>();
         }
 
         // Créé une base de données si elle n'existe pas
         public override void CreateDatabase(string databaseName, string sqlLogin)
         {
-            try
-            {
-                Open();
-
-                InternalExecuteNonQuery(String.Format("CREATE DATABASE IF NOT EXISTS {0} ;", databaseName));
-                InternalExecuteNonQuery(String.Format("GRANT {0} ON {1}.* TO '{2}'@'%' ;", "ALL", databaseName, sqlLogin));
-            }
-            catch (OracleException ex)
-            {
-                LogManager.GetLogger().Error(ex);
-
-                throw new DatabaseException(ex.Message);
-            }
-            finally
-            {
-                Close();
-            }
+            /*
+             * Oracle ne crée pas de BD mais seulement un utilisateur pour le tablespace
+             * 
+             */
         }
 
         // Supprime une base de donnée (mais pas l'utilisateur associé)
         public override void RemoveDatabase(string databaseName)
         {
-            try
-            {
-                Open();
-
-                Open();
-                OracleCommand cmd = new OracleCommand("DropDB", GetSqlConnection());
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.Parameters.Add(new OracleParameter("@dbName", databaseName));
-                cmd.ExecuteNonQuery();
-            }
-            catch (OracleException ex)
-            {
-                LogManager.GetLogger().Error(ex);
-
-                throw new DatabaseException(ex.Message);
-            }
-            finally
-            {
-                Close();
-            }
+            /*
+             * Oracle ne crée pas de BD mais seulement un utilisateur pour le tablespace
+             * 
+             */
         }
 
         #endregion
@@ -280,67 +177,19 @@ namespace EpsiLibrary2019.DataAccess
         // Donne les droits rights à l'utilisateur sqlLogin sur la base de données databaseName
         protected override void AddOrUpdateContributor(string databaseName, string sqlLogin, int groupType, string password, bool doUpdate)
         {
-            // L'utilisateur sqlLogin doit exister
-
-            // Ajout des droits
-            string mysqlRights = "";
-            switch (groupType)
-            {
-                case EpsiLibrary2019.DataAccess.DatabaseValues.ADMINISTRATEUR: mysqlRights = "SELECT , UPDATE , INSERT , DELETE , CREATE , DROP , INDEX , ALTER , CREATE VIEW , SHOW VIEW , EXECUTE"; break;
-                case EpsiLibrary2019.DataAccess.DatabaseValues.CRUD: mysqlRights = "SELECT, UPDATE, INSERT, DELETE, EXECUTE"; break;
-                case EpsiLibrary2019.DataAccess.DatabaseValues.SELECT: mysqlRights = "SELECT"; break;
-            }
-
-            try
-            {
-                Open();
-                if (doUpdate)
-                {
-                    InternalExecuteNonQuery(String.Format("REVOKE ALL PRIVILEGES ON {0}.* FROM '{1}'@'%';", databaseName, sqlLogin));
-                }
-                InternalExecuteNonQuery(String.Format("GRANT {0} ON {1}.* TO '{2}'@'%' ;", mysqlRights, databaseName, sqlLogin));
-
-
-                if (!String.IsNullOrWhiteSpace(password))
-                {
-                    string storeProcedure = "UpdateUserPassword";
-                    OracleCommand cmd = new OracleCommand(storeProcedure, GetSqlConnection());
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    cmd.Parameters.Add(new OracleParameter("@userName", sqlLogin));
-                    cmd.Parameters.Add(new OracleParameter("@userPassword", password));
-
-
-                    OracleParameter userUpdated = cmd.Parameters.Add("@userUpdated", OracleDbType.Int32);
-                    userUpdated.Direction = ParameterDirection.Output;
-
-                    cmd.ExecuteNonQuery();
-                }
-            }
-            catch (OracleException ex)
-            {
-                LogManager.GetLogger().Error(ex);
-
-                throw new DatabaseException(ex.Message);
-            }
-            finally
-            {
-                Close();
-            }
+            /*
+             * Oracle ne crée pas de contributeurs
+             * 
+             */
         }
 
         // Supprime les droits rights à l'utilisateur user sur la base de données databaseName
         public override void RemoveContributorFromDatabase(string databaseName, string sqlLogin)
         {
-            try
-            {
-                Open();
-                if (string.IsNullOrWhiteSpace(databaseName))
-                    databaseName = "*";
-
-                InternalExecuteNonQuery(String.Format("REVOKE ALL ON {0}.* FROM '{1}'@'%' ;", databaseName, sqlLogin));
-            }
-            catch { }
+            /*
+             * Oracle ne crée pas de contributeurs
+             * 
+             */
         }
 
         public override string MakeSqlLogin(string userLogin)
