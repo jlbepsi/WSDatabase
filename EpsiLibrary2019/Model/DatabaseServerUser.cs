@@ -1,10 +1,7 @@
 namespace EpsiLibrary2019.Model
 {
-    using System;
-    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Data.Entity.Spatial;
 
     [Table("DatabaseServerUser")]
     public partial class DatabaseServerUser

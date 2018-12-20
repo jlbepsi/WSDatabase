@@ -199,6 +199,8 @@ namespace EpsiLibrary2019.BusinessLogic
         public DatabaseGroupUser AddContributor(JWTAuthenticationIdentity user, GroupUserModel groupUserModel)
         {
             DatabaseGroupUser contributor = null;
+            DatabaseServerUser databaseServerUser = null;
+
             string serverName = null;
             try
             {
@@ -213,9 +215,10 @@ namespace EpsiLibrary2019.BusinessLogic
 
                 // Obtention du compte utilisateur du serveur
                 ServerAccountService serverAccountService = new ServerAccountService(this.DatabaseContext);
-                DatabaseServerUser databaseServerUser = serverAccountService.GetAccountByServerLogin(databaseDB.ServerId, databaseDB.UserLogin);
-                if (databaseServerUser == null)
-                    return null;
+                databaseServerUser = serverAccountService.GetAccountByServerSqlLogin(databaseDB.ServerId, groupUserModel.SqlLogin);
+                // Si l'objet databaseServerUser alors l'utilisateur n'a pas de compte ou ne fait pas partie du LDAP
+                // Utilisé pour l'envoi de mail plus bas
+                
 
                 // Obtention du serveur
                 DatabaseServerName databaseServerName = this.db.DatabaseServerNames.Find(databaseDB.ServerId);
