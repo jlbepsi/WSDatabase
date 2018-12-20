@@ -14,6 +14,9 @@ namespace WSDatabase.Controllers
     {
         private string role;
 
+        public JWTAuthenticationFilterAttribute()
+        {
+        }
         public JWTAuthenticationFilterAttribute(string role)
         {
             this.role = role;
@@ -43,7 +46,7 @@ namespace WSDatabase.Controllers
                 {
                     JWTAuthenticationIdentity identity = AuthenticationModule.PopulateUserIdentity(userPayloadToken);
 
-                    if (identity.Roles.Contains(this.role))
+                    if (this.role == null || identity.Roles.Contains(this.role))
                     {
                         actionContext.ControllerContext.RequestContext.Principal = identity.GetPrincipal();
                         return true;

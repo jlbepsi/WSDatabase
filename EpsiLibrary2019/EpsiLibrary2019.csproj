@@ -87,11 +87,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BusinessLogic\BaseService.cs" />
     <Compile Include="BusinessLogic\ServerAccountService.cs" />
     <Compile Include="BusinessLogic\ServerNameService.cs" />
     <Compile Include="BusinessLogic\DatabaseService.cs" />
     <Compile Include="DataAccess\BaseManagement.cs" />
-    <Compile Include="DataAccess\DatabaseException.cs" />
     <Compile Include="DataAccess\DatabaseManagementOracle.cs" />
     <Compile Include="DataAccess\DatabaseManagementMySQL.cs" />
     <Compile Include="DataAccess\DatabaseManagementSQLServer.cs" />
@@ -99,12 +99,15 @@
     <Compile Include="DataAccess\DatabaseManagement.cs" />
     <Compile Include="DataAccess\MockDatabaseManagement.cs" />
     <Compile Include="Model\DatabaseDB.cs" />
+    <Compile Include="Model\DatabaseException.cs" />
     <Compile Include="Model\DatabaseGroupUser.cs" />
+    <Compile Include="Model\DatabaseModel.cs" />
     <Compile Include="Model\DatabaseServerName.cs" />
     <Compile Include="Model\DatabaseServerType.cs" />
     <Compile Include="Model\DatabaseServerUser.cs" />
-    <Compile Include="Model\ModelDatabase.cs" />
-    <Compile Include="Model\ServerAccount.cs" />
+    <Compile Include="Model\DatabaseContexte.cs" />
+    <Compile Include="Model\GroupUserModel.cs" />
+    <Compile Include="Model\ServerAccountModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilitaires\Appenders\FileLogAppender.cs" />
     <Compile Include="Utilitaires\Appenders\MailLogAppender.cs" />

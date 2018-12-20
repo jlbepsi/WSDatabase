@@ -10,9 +10,17 @@ using EpsiLibrary2019.Model;
 
 namespace EpsiLibrary2019.BusinessLogic
 {
-    public class ServerAccountService
+    public class ServerAccountService : BaseService
     {
-        private ModelDatabase db = new ModelDatabase();
+        public ServerAccountService() 
+            : base ()
+        {
+        }
+
+        public ServerAccountService(DatabaseContexte model)
+            : base(model)
+        {
+        }
 
         /*public List<DatabaseServerUser> Get()
         {
@@ -21,19 +29,35 @@ namespace EpsiLibrary2019.BusinessLogic
             return list.ToList();
         }*/
 
-        public List<DatabaseServerUser> GetAccounts(int serverId)
+        public List<DatabaseServerUser> GetAccountsByServerId(int serverId)
         {
             var list = db.DatabaseServerUsers.Where(su => su.ServerId == serverId);
 
             return list.ToList();
         }
 
-        public DatabaseServerUser GetAccount(int serverId, string sqlLogin)
+        public List<DatabaseServerUser> GetAccountsByUserLogin(string userLogin)
         {
-            return db.DatabaseServerUsers.Find(serverId, sqlLogin);
+            var list = db.DatabaseServerUsers.Where(su => su.UserLogin.Equals(userLogin, StringComparison.InvariantCultureIgnoreCase));
+
+            return list.ToList();
         }
 
-        public DatabaseServerUser AddAccount(ServerAccount serverAccount)
+        public List<DatabaseServerUser> GetAccountsBySqlLogin(string sqlLogin)
+        {
+            var list = db.DatabaseServerUsers.Where(su => su.SqlLogin.Equals(sqlLogin, StringComparison.InvariantCultureIgnoreCase));
+
+            return list.ToList();
+        }
+
+        public DatabaseServerUser GetAccountByServerLogin(int serverId, string userLogin)
+        {
+            var database = db.DatabaseServerUsers.SingleOrDefault(su => su.ServerId == serverId && su.UserLogin.Equals(userLogin, StringComparison.InvariantCultureIgnoreCase));
+
+            return database;
+        }
+
+        public DatabaseServerUser AddAccount(ServerAccountModel serverAccount)
         {
             DatabaseServerUser databaseServerUser = new DatabaseServerUser
             {
@@ -75,7 +99,7 @@ namespace EpsiLibrary2019.BusinessLogic
             return databaseServerUser;
         }
 
-        public bool UpdateAccount(ServerAccount serverAccount)
+        public bool UpdateAccount(ServerAccountModel serverAccount)
         {
             DatabaseServerUser databaseServerUser = null;
             DatabaseServerName databaseServerName = null;

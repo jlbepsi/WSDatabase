@@ -5,9 +5,9 @@ namespace EpsiLibrary2019.Model
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
 
-    public partial class ModelDatabase : DbContext
+    public partial class DatabaseContexte : DbContext
     {
-        public ModelDatabase()
+        public DatabaseContexte()
             : base("name=ModelDatabase")
         {
         }

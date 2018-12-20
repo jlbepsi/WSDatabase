@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 
+using EpsiLibrary2019.Model;
 using EpsiLibrary2019.Utilitaires;
 
 namespace EpsiLibrary2019.DataAccess
@@ -190,8 +191,7 @@ namespace EpsiLibrary2019.DataAccess
             {
                 Open();
 
-                string storeProcedure = "DatabaseListDatabases";
-                SqlCommand cmd = new SqlCommand(storeProcedure, GetSqlConnection());
+                SqlCommand cmd = new SqlCommand("DatabaseListDatabases", GetSqlConnection());
                 cmd.CommandType = CommandType.StoredProcedure;
 
                 cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
@@ -222,8 +222,7 @@ namespace EpsiLibrary2019.DataAccess
                 Open();
 
                 // Création de la table
-                string storeProcedure = "DatabaseCreateDatabase";
-                SqlCommand cmd = new SqlCommand(storeProcedure, GetSqlConnection());
+                SqlCommand cmd = new SqlCommand("DatabaseCreateDatabase", GetSqlConnection());
                 cmd.CommandType = CommandType.StoredProcedure;
 
                 cmd.Parameters.Add(new SqlParameter("@dbName", databaseName));

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using Oracle.ManagedDataAccess.Client;
 
+using EpsiLibrary2019.Model;
 using EpsiLibrary2019.Utilitaires;
 
 namespace EpsiLibrary2019.DataAccess

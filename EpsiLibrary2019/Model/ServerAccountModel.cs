@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EpsiLibrary2019.Model
 {
-    public class ServerAccount
+    public class ServerAccountModel
     {
         public int ServerId { get; set; }
         public string UserLogin { get; set; }
