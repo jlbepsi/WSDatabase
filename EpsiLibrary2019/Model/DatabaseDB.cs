@@ -23,16 +23,6 @@ namespace EpsiLibrary2019.Model
         [StringLength(50)]
         public string NomBD { get; set; }
 
-        [Required]
-        [StringLength(30)]
-        public string UserLogin { get; set; }
-
-        [StringLength(30)]
-        public string Nom { get; set; }
-
-        [StringLength(30)]
-        public string Prenom { get; set; }
-
         public DateTime? DateCreation { get; set; }
 
         public string Commentaire { get; set; }

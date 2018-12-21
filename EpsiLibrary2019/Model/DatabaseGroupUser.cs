@@ -19,9 +19,13 @@ namespace EpsiLibrary2019.Model
         [StringLength(30)]
         public string SqlLogin { get; set; }
 
-        public bool UserEpsi { get; set; }
+        [StringLength(30)]
+        public string UserLogin { get; set; }
 
         public int GroupType { get; set; }
+
+        [StringLength(30)]
+        public string AddedByUserLogin { get; set; }
 
         public virtual DatabaseDB DatabaseDB { get; set; }
     }

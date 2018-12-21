@@ -5,10 +5,10 @@ namespace EpsiLibrary2019.Model
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
 
-    public partial class DatabaseContexte : DbContext
+    public partial class DatabaseContext : DbContext
     {
-        public DatabaseContexte()
-            : base("name=ModelDatabase")
+        public DatabaseContext()
+            : base("name=DatabaseContext")
         {
         }
 
@@ -17,23 +17,12 @@ namespace EpsiLibrary2019.Model
         public virtual DbSet<DatabaseServerName> DatabaseServerNames { get; set; }
         public virtual DbSet<DatabaseServerType> DatabaseServerTypes { get; set; }
         public virtual DbSet<DatabaseServerUser> DatabaseServerUsers { get; set; }
+        public virtual DbSet<DatabaseUserLogin> DatabaseUserLogins { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Entity<DatabaseDB>()
                 .Property(e => e.NomBD)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<DatabaseDB>()
-                .Property(e => e.UserLogin)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<DatabaseDB>()
-                .Property(e => e.Nom)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<DatabaseDB>()
-                .Property(e => e.Prenom)
                 .IsUnicode(false);
 
             modelBuilder.Entity<DatabaseDB>()
@@ -93,6 +82,23 @@ namespace EpsiLibrary2019.Model
             modelBuilder.Entity<DatabaseServerUser>()
                 .Property(e => e.UserLogin)
                 .IsUnicode(false);
+
+            modelBuilder.Entity<DatabaseUserLogin>()
+                .Property(e => e.UserLogin)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<DatabaseUserLogin>()
+                .Property(e => e.UserNom)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<DatabaseUserLogin>()
+                .Property(e => e.UserPrenom)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<DatabaseUserLogin>()
+                .HasMany(e => e.DatabaseServerUser)
+                .WithRequired(e => e.DatabaseUserLogin)
+                .WillCascadeOnDelete(false);
         }
     }
 }

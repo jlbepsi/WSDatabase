@@ -98,6 +98,7 @@
     <Compile Include="DataAccess\DatabaseValues.cs" />
     <Compile Include="DataAccess\DatabaseManagement.cs" />
     <Compile Include="DataAccess\MockDatabaseManagement.cs" />
+    <Compile Include="Model\DatabaseContext.cs" />
     <Compile Include="Model\DatabaseDB.cs" />
     <Compile Include="Model\DatabaseException.cs" />
     <Compile Include="Model\DatabaseGroupUser.cs" />
@@ -105,7 +106,7 @@
     <Compile Include="Model\DatabaseServerName.cs" />
     <Compile Include="Model\DatabaseServerType.cs" />
     <Compile Include="Model\DatabaseServerUser.cs" />
-    <Compile Include="Model\DatabaseContexte.cs" />
+    <Compile Include="Model\DatabaseUserLogin.cs" />
     <Compile Include="Model\GroupUserModel.cs" />
     <Compile Include="Model\ServerAccountModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

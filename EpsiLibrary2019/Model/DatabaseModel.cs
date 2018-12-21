@@ -8,11 +8,10 @@ namespace EpsiLibrary2019.Model
 {
     public class DatabaseModel
     {
+        public int Id { get; set; }
         public int ServerId { get; set; }
         public string NomBD { get; set; }
         public string UserLogin { get; set; }
-        public string UserNom { get; set; }
-        public string UserPrenom { get; set; }
         public string Commentaire { get; set; }
 
         public override string ToString()

@@ -18,7 +18,7 @@ namespace EpsiLibrary2019.BusinessLogic
         {
         }
 
-        public DatabaseService(DatabaseContexte contexte)
+        public DatabaseService(DatabaseContext contexte)
             : base(contexte)
         {
         }
@@ -26,32 +26,34 @@ namespace EpsiLibrary2019.BusinessLogic
         #region Gestion des bases de données
         public List<DatabaseDB> GetDatabases()
         {
-            IQueryable<DatabaseDB> list = db.DatabaseDBs.OrderBy(db => db.ServerId).ThenBy(db => db.UserLogin).ThenBy(db => db.Nom);
-
+            IQueryable<DatabaseDB> list = db.DatabaseDBs.OrderBy(db => db.ServerId);
             return list.ToList();
         }
 
         public List<DatabaseDB> GetDatabasesByServerId(int serverId)
         {
             IQueryable<DatabaseDB> list = db.DatabaseDBs.Where(db => db.ServerId == serverId);
-            list.OrderBy(db => db.UserLogin).ThenBy(db => db.Nom);
-
             return list.ToList();
         }
 
         public List<DatabaseDB> GetDatabasesByServerType(int serverType)
         {
             IQueryable<DatabaseDB> list = db.DatabaseDBs.Where(db => db.DatabaseServerName.ServerTypeId == serverType);
-            list.OrderBy(db => db.UserLogin).ThenBy(db => db.Nom);
-
             return list.ToList();
         }
 
         public List<DatabaseDB> GetDatabasesByLogin(string userLogin)
         {
-            IQueryable<DatabaseDB> list = db.DatabaseDBs.Where(db => db.UserLogin.Equals(userLogin, StringComparison.InvariantCultureIgnoreCase));
-            list.OrderBy(db => db.ServerId).ThenBy(db => db.Nom);
+            /* TODO */
+            //IQueryable<DatabaseDB> list = db.DatabaseGroupUsers.Where(dgu => dgu.UserLogin.Equals(userLogin, StringComparison.InvariantCultureIgnoreCase));
+            //list.OrderBy(db => db.ServerId).ThenBy(db => db.Nom);
 
+            var list = 
+                from dbs in db.DatabaseDBs
+                join dgu in db.DatabaseGroupUsers
+                on dbs.Id equals dgu.DbId
+                where dgu.UserLogin.Equals(userLogin, StringComparison.InvariantCultureIgnoreCase)
+                select dbs;
             return list.ToList();
         }
 
@@ -64,7 +66,7 @@ namespace EpsiLibrary2019.BusinessLogic
         {
             try
             {
-                DatabaseDB databaseDB = db.DatabaseDBs.SingleOrDefault(db => db.ServerId == serverId && db.Nom.Equals(nomBD, StringComparison.InvariantCultureIgnoreCase));
+                DatabaseDB databaseDB = db.DatabaseDBs.SingleOrDefault(db => db.ServerId == serverId && db.NomBD.Equals(nomBD, StringComparison.InvariantCultureIgnoreCase));
                 return databaseDB;
             }
             catch(Exception)
@@ -86,6 +88,7 @@ namespace EpsiLibrary2019.BusinessLogic
                 throw new DatabaseException("Le nom de la base de données existe déjà.");
 
             string serverName = "Serveur non trouvé";
+            DatabaseServerUser databaseServerUser = null;
             try
             {
                 // Obtention du serveur
@@ -95,7 +98,7 @@ namespace EpsiLibrary2019.BusinessLogic
 
                 // Obtention du compte utilisateur du serveur
                 ServerAccountService serverAccountService = new ServerAccountService(this.DatabaseContext);
-                DatabaseServerUser databaseServerUser = serverAccountService.GetAccountByServerLogin(database.ServerId, database.UserLogin);
+                databaseServerUser = serverAccountService.GetAccountByServerLogin(database.ServerId, database.UserLogin);
                 if (databaseServerUser == null)
                     return null;
 
@@ -112,22 +115,30 @@ namespace EpsiLibrary2019.BusinessLogic
                 throw new DatabaseException(string.Format("Erreur dans l'ajout de la base de données {0} sur le serveur '{1}'", database.ToString(), serverName), ex);
             }
 
+            // Ajout de la base de données dans le référentiel
             DatabaseDB databaseDB = new DatabaseDB
             {
                 ServerId = database.ServerId,
                 NomBD = database.NomBD,
-                UserLogin = database.UserLogin,
-                Nom = database.UserNom,
-                Prenom = database.UserPrenom,
                 DateCreation = DateTime.Now,
                 Commentaire = database.Commentaire
             };
-
-            // puis dans le référentiel
             db.DatabaseDBs.Add(databaseDB);
 
             try
             {
+                db.SaveChanges();
+
+                // puis du créateur comme contributeur avec tous les droits
+                DatabaseGroupUser databaseGroupUser = new DatabaseGroupUser
+                {
+                    DbId = databaseDB.Id,
+                    UserLogin = databaseServerUser.UserLogin,
+                    SqlLogin = databaseServerUser.SqlLogin,
+                    GroupType = DatabaseValues.ADMINISTRATEUR,
+                    AddedByUserLogin = databaseServerUser.UserLogin
+                };
+                db.DatabaseGroupUsers.Add(databaseGroupUser);
                 db.SaveChanges();
             }
             catch (DbUpdateConcurrencyException ex)
@@ -147,7 +158,7 @@ namespace EpsiLibrary2019.BusinessLogic
             return databaseDB;
         }
 
-        public bool UpdateDatabase(DatabaseDB database)
+        public bool UpdateDatabase(int id, DatabaseModel database)
         {
             DatabaseDB databaseDB = GetDatabase(database.Id);
             if (databaseDB == null)
@@ -169,25 +180,28 @@ namespace EpsiLibrary2019.BusinessLogic
             return true;
         }
 
-        public bool RemoveDatabase(DatabaseDB database)
+        /*public bool RemoveDatabase(DatabaseDB database)
         {
             if (database == null)
             {
                 return false;
             }
-            // L'objet passé en paramètre est de source inconnue, donc on le recharche dans la base de données
+            // L'objet passé en paramètre est de source inconnue, donc on recharge la base de données
             DatabaseDB databaseDB = GetDatabase(database.Id);
             if (databaseDB == null)
                 return false;
 
             return InternalRemoveDatabase(databaseDB);
-        }
+        }*/
 
         public DatabaseDB RemoveDatabase(int id)
         {
-            DatabaseDB database = GetDatabase(id);
-            if (InternalRemoveDatabase(database))
-                return database;
+            DatabaseDB databaseDB = GetDatabase(id);
+            if (databaseDB == null)
+                return null;
+
+            if (InternalRemoveDatabase(databaseDB))
+                return databaseDB;
 
             return null;
         }
@@ -196,9 +210,60 @@ namespace EpsiLibrary2019.BusinessLogic
         /*************************************************************************************************************************************/
 
         #region Gestion des contrbuteurs
-        public DatabaseGroupUser AddContributor(JWTAuthenticationIdentity user, GroupUserModel groupUserModel)
+
+        public DatabaseGroupUser GetDatabaseGroupUser(string userLogin, int id)
         {
-            DatabaseGroupUser contributor = null;
+            try
+            {
+                return db.DatabaseGroupUsers.SingleOrDefault(gu => gu.DbId == id && gu.UserLogin.Equals(userLogin, StringComparison.InvariantCultureIgnoreCase));
+            }
+            catch (Exception)
+            { }
+
+            return null;
+        }
+        public DatabaseGroupUser GetDatabaseGroupUserWithSqlLogin(string sqlLogin, int id)
+        {
+            try
+            {
+                return db.DatabaseGroupUsers.SingleOrDefault(gu => gu.DbId == id && gu.SqlLogin.Equals(sqlLogin, StringComparison.InvariantCultureIgnoreCase));
+            }
+            catch (Exception)
+            { }
+
+            return null;
+        }
+
+        public bool IsAdministrateur(string userLogin, int id)
+        {
+            try
+            {
+                DatabaseGroupUser databaseGroupUser = GetDatabaseGroupUser(userLogin, id);
+                if (databaseGroupUser != null)
+                    return databaseGroupUser.GroupType == DatabaseValues.ADMINISTRATEUR;
+            }
+            catch (Exception)
+            { }
+
+            return false;
+        }
+
+        public bool IsAdministrateur(string userLogin, List<DatabaseGroupUser> groupUsers)
+        {
+            foreach (DatabaseGroupUser groupUser in groupUsers)
+            {
+                if (userLogin.Equals(groupUser.UserLogin, StringComparison.InvariantCultureIgnoreCase) &&
+                    groupUser.GroupType == DatabaseValues.ADMINISTRATEUR)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public DatabaseGroupUser AddContributor(string userLogin, GroupUserModel groupUserModel)
+        {
             string serverName = null;
             try
             {
@@ -207,14 +272,8 @@ namespace EpsiLibrary2019.BusinessLogic
                 if (databaseDB == null)
                     return null;
 
-                // L'utilisateur doit êpre propriétaire de la base de données
-                if (! user.Name.Equals(databaseDB.UserLogin, StringComparison.InvariantCultureIgnoreCase))
-                    return null;
-
-                // Obtention du compte utilisateur du serveur
-                ServerAccountService serverAccountService = new ServerAccountService(this.DatabaseContext);
-                DatabaseServerUser databaseServerUser = serverAccountService.GetAccountByServerLogin(databaseDB.ServerId, databaseDB.UserLogin);
-                if (databaseServerUser == null)
+                // L'utilisateur doit être un administrateur de la base de données
+                if (! IsAdministrateur(userLogin, databaseDB.DatabaseGroupUser.ToList()))
                     return null;
 
                 // Obtention du serveur
@@ -235,15 +294,18 @@ namespace EpsiLibrary2019.BusinessLogic
                 throw new DatabaseException(string.Format("Erreur dans l'ajout du contributeur {0} sur le serveur '{1}'", groupUserModel.ToString(), serverName), ex);
             }
 
+            DatabaseGroupUser contributor = new DatabaseGroupUser
+            {
+                DbId = groupUserModel.DbId,
+                SqlLogin = groupUserModel.SqlLogin,
+                AddedByUserLogin = userLogin,
+                GroupType = groupUserModel.GroupType
+
+            };
+
             try
             {
                 // Ajout du contributeur dans le groupe
-                contributor.DbId = groupUserModel.DbId;
-                contributor.SqlLogin = groupUserModel.SqlLogin;
-                /*contributor.UserId = userId;
-                contributor.UserEpsiFullName = userEpsiFullName;*/
-                contributor.GroupType = groupUserModel.GroupType;
-
                 this.db.DatabaseGroupUsers.Add(contributor);
                 this.db.SaveChanges();
             }
@@ -273,6 +335,7 @@ namespace EpsiLibrary2019.BusinessLogic
                             body.AppendFormat("<br /><br />Un compte a été créé sur le serveur '{0}' avec un mot de passe aléatoire.<br />", infos.DatabaseServerName.Name);
                             body.Append("Vous devez vous connecter à <a href='https://ingenium.montpellier.epsi.fr/'>Ingénium</a> pour modifier le mot de passe de ce compte.");
                         }
+                        body.Append("Connectez-vous à <a href='https://ingenium.montpellier.epsi.fr/'>Ingénium</a> pour voir vos base de données.");
                         body.Append(@"</b><br /><br />L'administrateur réseau<br />EPSI Montpellier");
 
                         SendMail(userEpsi.Mail, "EPSI - Base de données - Ajout de contributeur", body.ToString());
@@ -293,6 +356,47 @@ namespace EpsiLibrary2019.BusinessLogic
             });*/
         }
 
+
+        public bool UpdateContributor(string userLogin, GroupUserModel groupUserModel)
+        {
+            DatabaseGroupUser databaseGroupUser = GetDatabaseGroupUserWithSqlLogin(groupUserModel.SqlLogin, groupUserModel.DbId);
+            if (databaseGroupUser == null)
+                return false;
+
+            // Modification du mot de passe sur le serveur
+            string serverName = null;
+            try
+            {
+                // Obtention de la base de données
+                DatabaseDB databaseDB = GetDatabase(groupUserModel.DbId);
+                if (databaseDB == null)
+                    return false;
+
+                // L'utilisateur doit être un administrateur de la base de données
+                if (!IsAdministrateur(userLogin, databaseDB.DatabaseGroupUser.ToList()))
+                    return false;
+
+                // Obtention du serveur
+                DatabaseServerName databaseServerName = this.db.DatabaseServerNames.Find(databaseDB.ServerId);
+                if (databaseServerName == null)
+                    return false;
+                serverName = databaseServerName.Name;
+
+                // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
+                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.ServerTypeId, databaseServerName.IPLocale);
+                if (management == null)
+                    return false;
+
+                management.UpdateContributor(databaseDB.NomBD, groupUserModel.SqlLogin, groupUserModel.GroupType, groupUserModel.Password);
+            }
+            catch (Exception ex)
+            {
+                throw new DatabaseException(string.Format("Erreur dans l'ajout du contributeur {0} sur le serveur '{1}'", groupUserModel.ToString(), serverName), ex);
+            }
+
+            return true;
+        }
+
         public static string GetGroupDescription(int groupType)
         {
             switch (groupType)
@@ -304,6 +408,10 @@ namespace EpsiLibrary2019.BusinessLogic
             }
         }
         #endregion
+
+
+        /*************************************************************************************************************************************/
+
 
         public void Dispose(bool disposing)
         {
@@ -336,6 +444,18 @@ namespace EpsiLibrary2019.BusinessLogic
                 throw new DatabaseException(string.Format("Erreur dans l'ajout de la base de données {0} sur le serveur '{1}'", database.ToString(), serverName), ex);
             }
 
+            // Suppression des contributeurs associés
+            db.DatabaseGroupUsers.RemoveRange(database.DatabaseGroupUser);
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw new Exception(string.Format("Erreur dans la suppression des contributeurs de la base de données '{0}' dans le référentiel", database.ToString()));
+            }
+
+            // Suppression de la base de données
             db.DatabaseDBs.Remove(database);
             try
             {

@@ -24,5 +24,7 @@ namespace EpsiLibrary2019.Model
         public string UserLogin { get; set; }
 
         public virtual DatabaseServerName DatabaseServerName { get; set; }
+
+        public virtual DatabaseUserLogin DatabaseUserLogin { get; set; }
     }
 }

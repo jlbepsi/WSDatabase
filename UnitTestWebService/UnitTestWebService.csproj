@@ -94,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="UnitTestDatabase.cs" />
+    <Compile Include="UnitTestServerAccount.cs" />
     <Compile Include="UnitTestJWT.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -106,6 +107,9 @@
       <Project>{eb1d19d5-c3f4-46c5-aa5f-4ac3ee2616dc}</Project>
       <Name>EpsiLibrary2019</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="epsiconfiguration.xml" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -131,7 +131,7 @@ namespace WSDatabase.Controllers
 
         // PUT: api/DatabaseDBs/5
         [ResponseType(typeof(void))]
-        public IHttpActionResult PutDatabaseDB(int id, DatabaseDB database)
+        public IHttpActionResult PutDatabaseDB(int id, DatabaseModel database)
         {
             // Vérification de l'appelant
             IHttpActionResult result = this.SecurityCheckRoleAdminOrOwner(database.UserLogin);
@@ -148,7 +148,7 @@ namespace WSDatabase.Controllers
                 return BadRequest();
             }
 
-            if (!service.UpdateDatabase(database))
+            if (! service.UpdateDatabase(id, database))
             {
                 return NotFound();
             }
@@ -160,21 +160,20 @@ namespace WSDatabase.Controllers
         [ResponseType(typeof(DatabaseDB))]
         public IHttpActionResult DeleteDatabaseDB(int id)
         {
-            // Obtention de la base de données
-            DatabaseDB databaseDB = service.GetDatabase(id);
-            if (databaseDB == null)
-            {
-                return NotFound();
-            }
             // Vérification de l'appelant
-            IHttpActionResult result = this.SecurityCheckRoleAdminOrOwner(databaseDB.UserLogin);
+            IHttpActionResult result = this.SecurityCheckRoleAdminOrUser();
             if (result != null)
                 return result;
 
-            if (service.RemoveDatabase(databaseDB))
-                return Ok(databaseDB);
+            // L'appelant doit être un administrateur de la base de données
+            if (! service.IsAdministrateur(this.GetJWTIdentity().Name, id))
+                return ResponseMessage(new System.Net.Http.HttpResponseMessage(HttpStatusCode.Forbidden) { ReasonPhrase = "Vous n'êtes pas administrateur de la base de données" });
 
-            return NotFound();
+            DatabaseDB databaseDB = service.RemoveDatabase(id);
+            if (databaseDB == null)
+                return NotFound();
+
+            return Ok(databaseDB);
         }
 
         protected override void Dispose(bool disposing)

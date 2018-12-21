@@ -176,7 +176,14 @@ namespace EpsiLibrary2019.DataAccess
         #region Contributeurs
 
         // Donne les droits rights à l'utilisateur sqlLogin sur la base de données databaseName
-        protected override void AddOrUpdateContributor(string databaseName, string sqlLogin, int groupType, string password, bool doUpdate)
+        public override void AddContributor(string databaseName, string sqlLogin, int groupType, string password)
+        {
+            /*
+             * Oracle ne crée pas de contributeurs
+             * 
+             */
+        }
+        public override void UpdateContributor(string databaseName, string sqlLogin, int groupType, string password)
         {
             /*
              * Oracle ne crée pas de contributeurs

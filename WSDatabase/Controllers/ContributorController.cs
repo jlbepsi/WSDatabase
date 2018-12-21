@@ -8,6 +8,7 @@ using System.Web.Http.Description;
 
 using EpsiLibrary2019.Model;
 using EpsiLibrary2019.BusinessLogic;
+using EpsiLibrary2019.Utilitaires;
 
 namespace WSDatabase.Controllers
 {
@@ -41,7 +42,7 @@ namespace WSDatabase.Controllers
                 return BadRequest(ModelState);
             }
 
-            DatabaseGroupUser databaseGroupUser = service.AddContributor(this.GetJWTIdentity(), groupUserModel);
+            DatabaseGroupUser databaseGroupUser = service.AddContributor(this.GetJWTIdentity().Name, groupUserModel);
             if (databaseGroupUser == null)
             {
                 return Conflict();

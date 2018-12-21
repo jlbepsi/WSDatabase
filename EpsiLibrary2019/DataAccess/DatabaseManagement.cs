@@ -61,16 +61,8 @@ namespace EpsiLibrary2019.DataAccess
         public abstract void AddOrUpdateUser(string sqlLogin, string password);
         public abstract void RemoveUser(string sqlLogin);
 
-        public void AddContributor(string databaseName, string sqlLogin,int groupType,  string password)
-        {
-            AddOrUpdateContributor(databaseName, sqlLogin, groupType, password, false);
-        }
-        public void UpdateContributor(string databaseName, string sqlLogin, int groupType, string password)
-        {
-            AddOrUpdateContributor(databaseName, sqlLogin, groupType, password, true);
-        }
-
-        protected abstract void AddOrUpdateContributor(string databaseName, string sqlLogin, int groupType, string password, bool doUpdate);
+        public abstract void AddContributor(string databaseName, string sqlLogin, int groupType, string password);
+        public abstract void UpdateContributor(string databaseName, string sqlLogin, int groupType, string password);
         public abstract void RemoveContributorFromDatabase(string databaseName, string sqlLogin);
 
         #endregion

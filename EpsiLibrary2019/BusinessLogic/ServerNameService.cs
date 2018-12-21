@@ -12,13 +12,13 @@ namespace EpsiLibrary2019.BusinessLogic
 {
     public class ServerNameService
     {
-        private DatabaseContexte db;
+        private DatabaseContext db;
 
         public ServerNameService()
         {
-            this.db = new DatabaseContexte();
+            this.db = new DatabaseContext();
         }
-        public ServerNameService(DatabaseContexte db)
+        public ServerNameService(DatabaseContext db)
         {
             this.db = db;
         }

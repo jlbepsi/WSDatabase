@@ -1,6 +1,5 @@
 namespace EpsiLibrary2019.Model
 {
-    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -23,7 +22,6 @@ namespace EpsiLibrary2019.Model
         [StringLength(50)]
         public string Name { get; set; }
 
-        [JsonIgnore]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<DatabaseServerName> DatabaseServerName { get; set; }
     }

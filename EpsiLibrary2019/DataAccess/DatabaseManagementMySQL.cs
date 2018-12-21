@@ -282,7 +282,47 @@ namespace EpsiLibrary2019.DataAccess
         #region Contributeurs
 
         // Donne les droits rights à l'utilisateur sqlLogin sur la base de données databaseName
-        protected override void AddOrUpdateContributor(string databaseName, string sqlLogin, int groupType, string password, bool doUpdate)
+
+        public override void AddContributor(string databaseName, string sqlLogin, int groupType, string password)
+        {
+            // Ajout des droits
+            string mysqlRights = "";
+            switch (groupType)
+            {
+                case EpsiLibrary2019.DataAccess.DatabaseValues.ADMINISTRATEUR: mysqlRights = "SELECT , UPDATE , INSERT , DELETE , CREATE , DROP , INDEX , ALTER , CREATE VIEW , SHOW VIEW , EXECUTE"; break;
+                case EpsiLibrary2019.DataAccess.DatabaseValues.CRUD: mysqlRights = "SELECT, UPDATE, INSERT, DELETE, EXECUTE"; break;
+                case EpsiLibrary2019.DataAccess.DatabaseValues.SELECT: mysqlRights = "SELECT"; break;
+            }
+
+            try
+            {
+                Open();
+                // Ajout de l'utilisateur sur le serveur
+                MySqlCommand cmd = new MySqlCommand("AddOrUpdateUser", GetSqlConnection());
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.Add(new MySqlParameter("@userName", sqlLogin));
+                cmd.Parameters.Add(new MySqlParameter("@userPassword", password));
+
+                cmd.ExecuteNonQuery();
+                InternalExecuteNonQuery(String.Format("GRANT USAGE ON * . * TO '{0}'@'%' IDENTIFIED BY '{1}' WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0 ;", sqlLogin, password));
+
+                // Ajout de l'utilisateur pour la base de données
+                InternalExecuteNonQuery(String.Format("GRANT {0} ON {1}.* TO '{2}'@'%' ;", mysqlRights, databaseName, sqlLogin));
+            }
+            catch (MySqlException ex)
+            {
+                LogManager.GetLogger().Error(ex);
+
+                throw new DatabaseException(ex.Message);
+            }
+            finally
+            {
+                Close();
+            }
+        }
+
+        public override void UpdateContributor(string databaseName, string sqlLogin, int groupType, string password)
         {
             // L'utilisateur sqlLogin doit exister
 
@@ -298,10 +338,7 @@ namespace EpsiLibrary2019.DataAccess
             try
             {
                 Open();
-                if (doUpdate)
-                {
-                    InternalExecuteNonQuery(String.Format("REVOKE ALL PRIVILEGES ON {0}.* FROM '{1}'@'%';", databaseName, sqlLogin));
-                }
+                InternalExecuteNonQuery(String.Format("REVOKE ALL PRIVILEGES ON {0}.* FROM '{1}'@'%';", databaseName, sqlLogin));
                 InternalExecuteNonQuery(String.Format("GRANT {0} ON {1}.* TO '{2}'@'%' ;", mysqlRights, databaseName, sqlLogin));
 
 

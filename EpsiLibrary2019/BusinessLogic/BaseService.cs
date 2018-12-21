@@ -8,19 +8,19 @@ namespace EpsiLibrary2019.BusinessLogic
 {
     public abstract class BaseService
     {
-        protected DatabaseContexte db = new DatabaseContexte();
+        protected DatabaseContext db = new DatabaseContext();
 
-        public DatabaseContexte DatabaseContext
+        public DatabaseContext DatabaseContext
         {
             get { return db; }
         }
 
         public BaseService()
         {
-            this.db = new DatabaseContexte();
+            this.db = new DatabaseContext();
         }
 
-        public BaseService(DatabaseContexte model)
+        public BaseService(DatabaseContext model)
         {
             this.db = model;
         }

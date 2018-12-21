@@ -17,7 +17,7 @@ namespace EpsiLibrary2019.BusinessLogic
         {
         }
 
-        public ServerAccountService(DatabaseContexte model)
+        public ServerAccountService(DatabaseContext model)
             : base(model)
         {
         }

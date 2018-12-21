@@ -270,26 +270,63 @@ namespace EpsiLibrary2019.DataAccess
         #endregion
 
         #region Contributeurs
-
-        // Donne les droits rights à l'utilisateur sqlLogin sur la base de données databaseName
-        protected override void AddOrUpdateContributor(string databaseName, string sqlLogin, int groupType, string password, bool doUpdate)
+        public override void AddContributor(string databaseName, string sqlLogin, int groupType, string password)
         {
-            // L'utilisateur sqlLogin doit exister
-
             try
             {
                 Open();
 
-                // Ajout de l'utilisateur
-                SqlCommand cmd = new SqlCommand("DatabaseAddUser", GetSqlConnection());
-                cmd.CommandType = CommandType.StoredProcedure;
+                // Ajout de l'utilisateur sur le serveur
+                SqlCommand cmd;
+                if (!String.IsNullOrWhiteSpace(password))
+                {
+                    // Ajout de l'utilisateur sur le serveur
+                    cmd = new SqlCommand("DatabaseAddOrUpdateUser", GetSqlConnection());
+                    cmd.CommandType = CommandType.StoredProcedure;
 
-                cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
-                cmd.Parameters.Add(new SqlParameter("@password", password));
-                cmd.ExecuteNonQuery();
+                    cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
+                    cmd.Parameters.Add(new SqlParameter("@password", password));
+                    cmd.ExecuteNonQuery();
 
-                // Ajout des droits
-                // Ajout des droits
+
+                    // Les droits pour l'utilisateur
+                    string sqlserverRights = "";
+                    switch (groupType)
+                    {
+                        case EpsiLibrary2019.DataAccess.DatabaseValues.ADMINISTRATEUR: sqlserverRights = "ALTER, BACKUP DATABASE, CREATE DEFAULT, CREATE FUNCTION, CREATE PROCEDURE, CREATE RULE, CREATE SCHEMA, CREATE SYNONYM, CREATE TABLE, CREATE TYPE, CREATE VIEW, DELETE, EXECUTE, INSERT, SELECT, UPDATE, VIEW DEFINITION"; break;
+                        case EpsiLibrary2019.DataAccess.DatabaseValues.CRUD: sqlserverRights = "SELECT, UPDATE, INSERT, DELETE, EXECUTE"; break;
+                        case EpsiLibrary2019.DataAccess.DatabaseValues.SELECT: sqlserverRights = "SELECT"; break;
+                    }
+
+                    // Ajout de l'utilisateur pour la base de données
+                    cmd = new SqlCommand("DatabaseAddContributor", GetSqlConnection());
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.Add(new SqlParameter("@dbName", databaseName));
+                    cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
+                    cmd.Parameters.Add(new SqlParameter("@userRights", sqlserverRights));
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (SqlException ex)
+            {
+                LogManager.GetLogger().Error(ex);
+                throw new DatabaseException(ex.Message);
+            }
+            finally
+            {
+                Close();
+            }
+        }
+        public override void UpdateContributor(string databaseName, string sqlLogin, int groupType, string password)
+        {
+            try
+            {
+                Open();
+
+                SqlCommand cmd;
+
+                // Modification des droits
                 string sqlserverRights = "";
                 switch (groupType)
                 {
@@ -304,23 +341,18 @@ namespace EpsiLibrary2019.DataAccess
                 cmd.Parameters.Add(new SqlParameter("@dbName", databaseName));
                 cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
                 cmd.Parameters.Add(new SqlParameter("@userRights", sqlserverRights));
-                cmd.Parameters.Add(new SqlParameter("@doUpdate", doUpdate ? 1 : 0));
+                cmd.Parameters.Add(new SqlParameter("@doUpdate", 1));
                 cmd.ExecuteNonQuery();
 
-
+                // Modification du mot de passe
                 if (!String.IsNullOrWhiteSpace(password))
                 {
-                    cmd = new SqlCommand("DatabaseUpdateContributorPassword", GetSqlConnection());
+                    // Ajout de l'utilisateur
+                    cmd = new SqlCommand("DatabaseAddOrUpdateUser", GetSqlConnection());
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.Add(new SqlParameter("@dbName", databaseName));
                     cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
                     cmd.Parameters.Add(new SqlParameter("@password", password));
-
-
-                    SqlParameter userUpdated = cmd.Parameters.Add("@userUpdated", SqlDbType.Int);
-                    userUpdated.Direction = ParameterDirection.Output;
-
                     cmd.ExecuteNonQuery();
                 }
             }
