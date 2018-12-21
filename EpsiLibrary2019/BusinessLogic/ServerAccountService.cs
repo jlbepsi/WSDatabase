@@ -57,6 +57,13 @@ namespace EpsiLibrary2019.BusinessLogic
             return database;
         }
 
+        public DatabaseServerUser GetAccountByServerSqlLogin(int serverId, string sqlLogin)
+        {
+            var database = db.DatabaseServerUsers.SingleOrDefault(su => su.ServerId == serverId && su.SqlLogin.Equals(sqlLogin, StringComparison.InvariantCultureIgnoreCase));
+
+            return database;
+        }
+
         public DatabaseServerUser AddAccount(ServerAccountModel serverAccount)
         {
             DatabaseServerUser databaseServerUser = new DatabaseServerUser
