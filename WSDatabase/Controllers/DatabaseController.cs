@@ -130,6 +130,12 @@ namespace WSDatabase.Controllers
         }
 
         // PUT: api/DatabaseDBs/5
+        /// <summary>
+        /// Modifie les informations (commentaire, ... <paramref name="database"/>) de la base de données identifiée par <paramref name="id"/>
+        /// </summary>
+        /// <param name="id">L'identifiant de la base de données</param>
+        /// <param name="database">L'objet DatabaseModel contenant les données</param>
+        /// <returns>Retourne le code statut HTTP NoContent si la modification a été faite, BadRequest sinon</returns>
         [ResponseType(typeof(void))]
         public IHttpActionResult PutDatabaseDB(int id, DatabaseModel database)
         {
@@ -157,6 +163,11 @@ namespace WSDatabase.Controllers
         }
 
         // DELETE: api/DatabaseDBs/5
+        /// <summary>
+        /// Supprime la base de données identifiée par <paramref name="id"/>
+        /// </summary>
+        /// <param name="id">L'identifiant de la base de données</param>
+        /// <returns>Retourne le code statut HTTP Ok si la suppression a été faite, Forbidden ou NotFound sinon</returns>
         [ResponseType(typeof(DatabaseDB))]
         public IHttpActionResult DeleteDatabaseDB(int id)
         {

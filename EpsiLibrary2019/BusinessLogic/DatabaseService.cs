@@ -222,6 +222,7 @@ namespace EpsiLibrary2019.BusinessLogic
 
             return null;
         }
+
         public DatabaseGroupUser GetDatabaseGroupUserWithSqlLogin(string sqlLogin, int id)
         {
             try
@@ -232,6 +233,12 @@ namespace EpsiLibrary2019.BusinessLogic
             { }
 
             return null;
+        }
+
+        public List<DatabaseGroupUser> GetDatabaseGroupUserWithSqlLogin(string sqlLogin)
+        {
+            IQueryable<DatabaseGroupUser> list = db.DatabaseGroupUsers.Where(gu => gu.SqlLogin.Equals(sqlLogin, StringComparison.InvariantCultureIgnoreCase));
+            return list.ToList();
         }
 
         public bool IsAdministrateur(string userLogin, int id)

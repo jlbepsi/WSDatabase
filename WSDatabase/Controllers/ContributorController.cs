@@ -16,19 +16,28 @@ namespace WSDatabase.Controllers
     {
         private DatabaseService service = new DatabaseService();
 
-        // GET: api/Contributor
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
         // GET: api/Contributor/5
-        public string Get(int id)
+        /// <summary>
+        /// Retourne les groupes <code>DatabaseGroupUser</code> auquel appartient le contributeur identifié par <paramref name="sqlLogin"/>
+        /// </summary>
+        /// <param name="id">L'identifiant de la base de données</param>
+        /// <returns>Un objet <code>DatabaseDB</code></returns>
+        /// <example>
+        /// http://serveur/api/Contributor/un.contributeur.ajoute
+        /// </example>
+        public List<DatabaseGroupUser> Get(string sqlLogin)
         {
-            return "value";
+            List<DatabaseGroupUser> list = service.GetDatabaseGroupUserWithSqlLogin(sqlLogin);
+            return list;
         }
 
         // POST: api/Contributor
+        /// <summary>
+        /// Ajoute un contributeur pour une base de données, les éléments sont identifiés par <paramref name="groupUserModel"/>
+        /// </summary>
+        /// <param name="groupUserModel">L'objet contenant les informations du contributeur et de la base de données</param>
+        /// <returns>Retourne le code statut HTTP Ok si l'ajout a été fait, BadRequest ou Conflict sinon
+        /// </returns>
         [ResponseType(typeof(DatabaseGroupUser))]
         public IHttpActionResult Post(GroupUserModel groupUserModel)
         {
