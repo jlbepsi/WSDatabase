@@ -17,17 +17,17 @@ namespace EpsiLibrary2019.BusinessLogic
         {
         }
 
-        public ServerAccountService(DatabaseContext model)
+        public ServerAccountService(ServiceEpsiContext model)
             : base(model)
         {
         }
 
-        /*public List<DatabaseServerUser> Get()
+        public List<DatabaseServerUser> GetAccounts()
         {
             var list = db.DatabaseServerUsers.OrderBy(su => su.SqlLogin).ThenBy(su => su.ServerId);
 
             return list.ToList();
-        }*/
+        }
 
         public List<DatabaseServerUser> GetAccountsByServerId(int serverId)
         {
@@ -36,16 +36,34 @@ namespace EpsiLibrary2019.BusinessLogic
             return list.ToList();
         }
 
-        public List<DatabaseServerUser> GetAccountsByUserLogin(string userLogin)
+        public List<ServerAccounUsertModel> GetAccountsByUserLogin(string userLogin)
         {
-            var list = db.DatabaseServerUsers.Where(su => su.UserLogin.Equals(userLogin, StringComparison.InvariantCultureIgnoreCase));
+            var list = from dsn in db.DatabaseServerNames
+                       join dsu in db.DatabaseServerUsers on dsn.Id equals dsu.ServerId into dsuLeft
+                       from subdsu in dsuLeft.DefaultIfEmpty()
+                       where subdsu.UserLogin.Equals(userLogin, StringComparison.InvariantCultureIgnoreCase) || subdsu.UserLogin == null
+                       select new ServerAccounUsertModel
+                       {
+                           DatabaseServerName = dsn,
+                           SqlLogin = subdsu.SqlLogin,
+                           UserLogin = subdsu.UserLogin,
+                       };
 
             return list.ToList();
         }
 
-        public List<DatabaseServerUser> GetAccountsBySqlLogin(string sqlLogin)
+        public List<ServerAccounUsertModel> GetAccountsBySqlLogin(string sqlLogin)
         {
-            var list = db.DatabaseServerUsers.Where(su => su.SqlLogin.Equals(sqlLogin, StringComparison.InvariantCultureIgnoreCase));
+            var list = from dsn in db.DatabaseServerNames
+                       join dsu in db.DatabaseServerUsers on dsn.Id equals dsu.ServerId into dsuLeft
+                       from subdsu in dsuLeft.DefaultIfEmpty()
+                       where subdsu.SqlLogin.Equals(sqlLogin, StringComparison.InvariantCultureIgnoreCase) || subdsu.SqlLogin == null
+                       select new ServerAccounUsertModel
+                       {
+                           DatabaseServerName = dsn,
+                           SqlLogin = subdsu.SqlLogin,
+                           UserLogin = subdsu.UserLogin,
+                       };
 
             return list.ToList();
         }
@@ -81,7 +99,7 @@ namespace EpsiLibrary2019.BusinessLogic
                     return null;
 
                 // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
-                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.ServerTypeId, databaseServerName.IPLocale);
+                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale);
                 // Création du login SQL
                 databaseServerUser.SqlLogin = management.MakeSqlLogin(serverAccount.UserLogin);
                 // Ajout du login SQL sur le serveur
@@ -133,7 +151,7 @@ namespace EpsiLibrary2019.BusinessLogic
             try
             {
                 // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
-                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.ServerTypeId, databaseServerName.IPLocale);
+                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale);
                 // Modification du mot de passe du login SQL sur le serveur
                 management.AddOrUpdateUser(databaseServerUser.SqlLogin, serverAccount.Password);
             }
@@ -167,7 +185,7 @@ namespace EpsiLibrary2019.BusinessLogic
             try
             {
                 // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
-                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.ServerTypeId, databaseServerName.IPLocale);
+                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale);
                 // Modification du mot de passe du login SQL sur le serveur
                 management.RemoveUser(userLogin);
             }

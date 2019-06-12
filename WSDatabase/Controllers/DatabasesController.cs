@@ -11,7 +11,7 @@ using EpsiLibrary2019.BusinessLogic;
 
 namespace WSDatabase.Controllers
 {
-    public class DatabaseController : SecureApiController
+    public class DatabasesController : SecureApiController
     {
         private DatabaseService service = new DatabaseService();
 
@@ -22,7 +22,7 @@ namespace WSDatabase.Controllers
         /// <param name="serverId">L'identifiant du serveur de base de données</param>
         /// <returns>Une liste d'objets <code>DatabaseDB</code></returns>
         /// <example>
-        /// http://serveur/api/ServerAccount/3
+        /// http://serveur/api/databasess/3
         /// </example>
         public List<DatabaseDB> GetDatabases()
         {
@@ -36,9 +36,9 @@ namespace WSDatabase.Controllers
         /// <param name="serverId">L'identifiant du serveur de base de données</param>
         /// <returns>Une liste d'objets <code>DatabaseDB</code></returns>
         /// <example>
-        /// http://serveur/api/Database/ServerId/3
+        /// http://serveur/api/databases/ServerId/3
         /// </example>
-        [Route("api/Database/ServerId/{serverId}")]
+        [Route("api/Databases/ServerId/{serverId}")]
         public List<DatabaseDB> GetDatabasesByServerId(int serverId)
         {
             return service.GetDatabasesByServerId(serverId);
@@ -52,12 +52,12 @@ namespace WSDatabase.Controllers
         /// <param name="serverId">L'identifiant du serveur de base de données</param>
         /// <returns>Une liste d'objets <code>DatabaseDB</code></returns>
         /// <example>
-        /// http://serveur/api/Database/ServerType/2
+        /// http://serveur/api/databases/ServerCode/mysql
         /// </example>
-        [Route("api/Database/ServerType/{serverType}")]
-        public List<DatabaseDB> GetDatabasesByServerType(int serverType)
+        [Route("api/Databases/ServerCode/{serverCode}")]
+        public List<DatabaseDB> GetDatabasesByServerType(string serverCode)
         {
-            return service.GetDatabasesByServerType(serverType);
+            return service.GetDatabasesByServerCode(serverCode);
         }
 
         // GET: api/Database
@@ -67,9 +67,9 @@ namespace WSDatabase.Controllers
         /// <param name="userLogin">L'identifiant de l'utilisateur</param>
         /// <returns>Une liste d'objets <code>DatabaseDB</code></returns>
         /// <example>
-        /// http://serveur/api/Database/Login/test.v8/
+        /// http://serveur/api/databases/Login/test.v8/
         /// </example>
-        [Route("api/Database/Login/{userLogin}")]
+        [Route("api/Databases/Login/{userLogin}")]
         public List<DatabaseDB> GetDatabasesByLogin(string userLogin)
         {
             return service.GetDatabasesByLogin(userLogin);
@@ -82,7 +82,7 @@ namespace WSDatabase.Controllers
         /// <param name="id">L'identifiant de la base de données</param>
         /// <returns>Un objet <code>DatabaseDB</code></returns>
         /// <example>
-        /// http://serveur/api/Database/3
+        /// http://serveur/api/databases/3
         /// </example>
         [ResponseType(typeof(DatabaseDB))]
         public IHttpActionResult GetDatabase(int id)
@@ -103,7 +103,7 @@ namespace WSDatabase.Controllers
         /// <param name="databaseDB">L'objet DatabaseDB a ajouter</param>
         /// <returns>Retourne l'URL de l'objet créé si l'ajout est valide, le code statut HTTP BadRequest ou Conflict sinon</returns>
         /// <example>
-        /// http://serveur/api/Database/
+        /// http://serveur/api/databases/
         /// L'enveloppe Body contient le JSON de le la base de données a ajouter :
         /// <code>{ "ServerId":0,"NomBD":"DBTest2","UserLogin":"test.v8","UserNom":"V8","UserPrenom":"Test","Commentaire":"Aucun" }</code>
         /// </example>

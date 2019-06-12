@@ -190,7 +190,7 @@ namespace EpsiLibrary2019.DataAccess
             }
         }
 
-        public override int GetDatabaseServerType() { return DatabaseValues.MYSQL_TYPE; }
+        public override string GetDatabaseServerType() { return DatabaseValues.MYSQL_TYPE; }
 
 
         // Liste tous les base de données de l'utilisateur, format renvoyé

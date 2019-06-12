@@ -5,18 +5,25 @@ using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
+using System.IO;
 
 namespace EpsiLibrary2019.Utilitaires
 {
     public class AuthenticationModule
     {
-        private const string privateKey = "<Mettre ici la clé secrète>";
-        SecurityKey signingKey;
+        //private const string privateKey = "<Mettre ici la clé secrète>";
         TokenValidationParameters validationParameters;
 
         public AuthenticationModule()
         {
-            signingKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(privateKey));
+            //SecurityKey signingKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(privateKey));
+
+            var xmlString = String.Empty;
+            var path = ConfigurationManager.GetConfigurationManager().GetValue("security.keys.public");
+            X509Certificate2 x509Certificate = LoadCertificateFile(path);
+            X509SecurityKey publicKey = new X509SecurityKey(x509Certificate);
 
             validationParameters = new TokenValidationParameters
             {
@@ -24,7 +31,7 @@ namespace EpsiLibrary2019.Utilitaires
                 ValidateAudience = false,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = signingKey
+                IssuerSigningKey = publicKey
             };
 
         }
@@ -63,6 +70,22 @@ namespace EpsiLibrary2019.Utilitaires
             }
 
             return validatedToken;
+        }
+ 
+        private static X509Certificate2 LoadCertificateFile(string filename)
+        {
+            X509Certificate2 x509 = null;
+            using (FileStream fs = File.OpenRead(filename))
+            {
+                byte[] rawData = new byte[fs.Length];
+                fs.Read(rawData, 0, rawData.Length);
+                if (rawData != null)
+                {
+                    x509 = new X509Certificate2();
+                    x509.Import(rawData);
+                }
+            }
+            return x509;
         }
 
     }

@@ -11,6 +11,12 @@
     <useLogs value="true" />
   </logs>
 
+  <security>
+    <keys>
+      <public value="G:\Developpement\C#\WSDatabase\keys\public_key.der" />
+    </keys>
+  </security>
+
   <database>
     <mock value="0" />
 

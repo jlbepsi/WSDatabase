@@ -22,8 +22,12 @@ namespace EpsiLibrary2019.Model
         [StringLength(30)]
         public string UserLogin { get; set; }
 
+        [StringLength(60)]
+        public string UserFullName { get; set; }
+
         public int GroupType { get; set; }
 
+        [Required]
         [StringLength(30)]
         public string AddedByUserLogin { get; set; }
 

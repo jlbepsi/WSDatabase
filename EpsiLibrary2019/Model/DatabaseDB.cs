@@ -12,7 +12,7 @@ namespace EpsiLibrary2019.Model
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public DatabaseDB()
         {
-            DatabaseGroupUser = new HashSet<DatabaseGroupUser>();
+            DatabaseGroupUsers = new HashSet<DatabaseGroupUser>();
         }
 
         public int Id { get; set; }
@@ -30,6 +30,6 @@ namespace EpsiLibrary2019.Model
         public virtual DatabaseServerName DatabaseServerName { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<DatabaseGroupUser> DatabaseGroupUser { get; set; }
+        public virtual ICollection<DatabaseGroupUser> DatabaseGroupUsers { get; set; }
     }
 }

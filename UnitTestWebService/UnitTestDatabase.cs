@@ -62,7 +62,7 @@ namespace UnitTestWebService
             Assert.IsTrue(databaseDB.Id > 0);
             Assert.IsNotNull(databaseDB.DateCreation);
 
-            Assert.IsTrue(databaseDB.DatabaseGroupUser.Count == 1);
+            Assert.IsTrue(databaseDB.DatabaseGroupUsers.Count == 1);
         }
 
         [TestMethod]
@@ -111,7 +111,7 @@ namespace UnitTestWebService
                 Password = "456ABC",
                 GroupType = DatabaseValues.CRUD
             };
-            Assert.IsTrue(service.UpdateContributor("test.v8", groupUserModel));
+            Assert.IsTrue(service.UpdateContributor(groupUserModel));
         }
     }
 }

@@ -13,15 +13,15 @@ namespace EpsiLibrary2019.Model
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public DatabaseServerName()
         {
-            DatabaseDB = new HashSet<DatabaseDB>();
-            DatabaseServerUser = new HashSet<DatabaseServerUser>();
+            DatabaseDBs = new HashSet<DatabaseDB>();
+            DatabaseServerUsers = new HashSet<DatabaseServerUser>();
         }
 
-        [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public int ServerId { get; set; }
+        public int Id { get; set; }
 
-        public int ServerTypeId { get; set; }
+        [StringLength(15)]
+        public string Code { get; set; }
 
         [Required]
         [StringLength(30)]
@@ -38,14 +38,14 @@ namespace EpsiLibrary2019.Model
         [StringLength(200)]
         public string Description { get; set; }
 
-        [JsonIgnore]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<DatabaseDB> DatabaseDB { get; set; }
-
-        public virtual DatabaseServerType DatabaseServerType { get; set; }
+        public int CanAddDatabase { get; set; }
 
         [JsonIgnore]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<DatabaseServerUser> DatabaseServerUser { get; set; }
+        public virtual ICollection<DatabaseDB> DatabaseDBs { get; set; }
+
+        [JsonIgnore]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<DatabaseServerUser> DatabaseServerUsers { get; set; }
     }
 }

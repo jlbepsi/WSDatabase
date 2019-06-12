@@ -11,7 +11,12 @@ using EpsiLibrary2019.BusinessLogic;
 
 namespace WSDatabase.Controllers
 {
-    [JWTAuthenticationFilter("ROLE_SUPER_ADMIN")]
+    /*
+     * TODO: Rétablir la sécurité
+     * 
+     * [JWTAuthenticationFilter("ROLE_SUPER_ADMIN")]
+     * 
+     */
     public class ServerNamesController : ApiController
     {
         private ServerNameService service = new ServerNameService();
@@ -44,7 +49,7 @@ namespace WSDatabase.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (id != databaseServerName.ServerId)
+            if (id != databaseServerName.Id)
             {
                 return BadRequest();
             }
@@ -71,7 +76,7 @@ namespace WSDatabase.Controllers
                 return Conflict();
             }
 
-            return CreatedAtRoute("DefaultApi", new { id = databaseServerName.ServerId }, databaseServerName);
+            return CreatedAtRoute("DefaultApi", new { id = databaseServerName.Id }, databaseServerName);
         }
 
         // DELETE: api/DatabaseServerNames/5

@@ -18,7 +18,7 @@ namespace EpsiLibrary2019.BusinessLogic
         {
         }
 
-        public DatabaseService(DatabaseContext contexte)
+        public DatabaseService(ServiceEpsiContext contexte)
             : base(contexte)
         {
         }
@@ -36,18 +36,14 @@ namespace EpsiLibrary2019.BusinessLogic
             return list.ToList();
         }
 
-        public List<DatabaseDB> GetDatabasesByServerType(int serverType)
+        public List<DatabaseDB> GetDatabasesByServerCode(string serverCode)
         {
-            IQueryable<DatabaseDB> list = db.DatabaseDBs.Where(db => db.DatabaseServerName.ServerTypeId == serverType);
+            var list = db.DatabaseDBs.Where(db => db.DatabaseServerName.Code.Equals(serverCode, StringComparison.InvariantCultureIgnoreCase));
             return list.ToList();
         }
 
         public List<DatabaseDB> GetDatabasesByLogin(string userLogin)
         {
-            /* TODO */
-            //IQueryable<DatabaseDB> list = db.DatabaseGroupUsers.Where(dgu => dgu.UserLogin.Equals(userLogin, StringComparison.InvariantCultureIgnoreCase));
-            //list.OrderBy(db => db.ServerId).ThenBy(db => db.Nom);
-
             var list = 
                 from dbs in db.DatabaseDBs
                 join dgu in db.DatabaseGroupUsers
@@ -97,13 +93,13 @@ namespace EpsiLibrary2019.BusinessLogic
                     return null;
 
                 // Obtention du compte utilisateur du serveur
-                ServerAccountService serverAccountService = new ServerAccountService(this.DatabaseContext);
+                ServerAccountService serverAccountService = new ServerAccountService(this.ServiceEpsiContext);
                 databaseServerUser = serverAccountService.GetAccountByServerLogin(database.ServerId, database.UserLogin);
                 if (databaseServerUser == null)
                     return null;
 
                 // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
-                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.ServerTypeId, databaseServerName.IPLocale);
+                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale);
                 if (management == null)
                     return null;
 
@@ -279,10 +275,6 @@ namespace EpsiLibrary2019.BusinessLogic
                 if (databaseDB == null)
                     return null;
 
-                // L'utilisateur doit être un administrateur de la base de données
-                if (! IsAdministrateur(userLogin, databaseDB.DatabaseGroupUser.ToList()))
-                    return null;
-
                 // Obtention du serveur
                 DatabaseServerName databaseServerName = this.db.DatabaseServerNames.Find(databaseDB.ServerId);
                 if (databaseServerName == null)
@@ -290,7 +282,7 @@ namespace EpsiLibrary2019.BusinessLogic
                 serverName = databaseServerName.Name;
 
                 // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
-                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.ServerTypeId, databaseServerName.IPLocale);
+                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale);
                 if (management == null)
                     return null;
 
@@ -364,7 +356,7 @@ namespace EpsiLibrary2019.BusinessLogic
         }
 
 
-        public bool UpdateContributor(string userLogin, GroupUserModel groupUserModel)
+        public bool UpdateContributor(GroupUserModel groupUserModel)
         {
             DatabaseGroupUser databaseGroupUser = GetDatabaseGroupUserWithSqlLogin(groupUserModel.SqlLogin, groupUserModel.DbId);
             if (databaseGroupUser == null)
@@ -379,10 +371,6 @@ namespace EpsiLibrary2019.BusinessLogic
                 if (databaseDB == null)
                     return false;
 
-                // L'utilisateur doit être un administrateur de la base de données
-                if (!IsAdministrateur(userLogin, databaseDB.DatabaseGroupUser.ToList()))
-                    return false;
-
                 // Obtention du serveur
                 DatabaseServerName databaseServerName = this.db.DatabaseServerNames.Find(databaseDB.ServerId);
                 if (databaseServerName == null)
@@ -390,7 +378,7 @@ namespace EpsiLibrary2019.BusinessLogic
                 serverName = databaseServerName.Name;
 
                 // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
-                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.ServerTypeId, databaseServerName.IPLocale);
+                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale);
                 if (management == null)
                     return false;
 
@@ -402,6 +390,19 @@ namespace EpsiLibrary2019.BusinessLogic
             }
 
             return true;
+        }
+
+
+        public DatabaseGroupUser RemoveContributor(string userLogin, string sqlLogin, int databaseId)
+        {
+            DatabaseGroupUser databaseGroupUser = GetDatabaseGroupUserWithSqlLogin(sqlLogin, databaseId);
+            if (databaseGroupUser == null)
+                return null;
+
+            if (InternalRemoveContributor(databaseGroupUser))
+                return databaseGroupUser;
+
+            return null;
         }
 
         public static string GetGroupDescription(int groupType)
@@ -439,7 +440,7 @@ namespace EpsiLibrary2019.BusinessLogic
                     return false;
 
                 // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
-                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.ServerTypeId, databaseServerName.IPLocale);
+                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale);
                 if (management == null)
                     return false;
 
@@ -448,11 +449,11 @@ namespace EpsiLibrary2019.BusinessLogic
             }
             catch (Exception ex)
             {
-                throw new DatabaseException(string.Format("Erreur dans l'ajout de la base de données {0} sur le serveur '{1}'", database.ToString(), serverName), ex);
+                throw new DatabaseException(string.Format("Erreur dans la suppression de la base de données {0} sur le serveur '{1}'", database.ToString(), serverName), ex);
             }
 
             // Suppression des contributeurs associés
-            db.DatabaseGroupUsers.RemoveRange(database.DatabaseGroupUser);
+            db.DatabaseGroupUsers.RemoveRange(database.DatabaseGroupUsers);
             try
             {
                 db.SaveChanges();
@@ -471,6 +472,43 @@ namespace EpsiLibrary2019.BusinessLogic
             catch (DbUpdateConcurrencyException)
             {
                 throw new Exception(string.Format("Erreur dans la suppression de la base de données '{0}' dans le référentiel", database.ToString()));
+            }
+
+            return true;
+        }
+
+        private bool InternalRemoveContributor(DatabaseGroupUser databaseGroupUser)
+        {
+            string serverName = "Serveur non trouvé";
+            try
+            {
+                // Obtention du serveur
+                DatabaseServerName databaseServerName = this.db.DatabaseServerNames.Find(databaseGroupUser.DatabaseDB.ServerId);
+                if (databaseServerName == null)
+                    return false;
+
+                // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
+                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale);
+                if (management == null)
+                    return false;
+
+                // et suppression de la base de données sur le serveur de BD
+                management.RemoveContributorFromDatabase(databaseGroupUser.DatabaseDB.NomBD, databaseGroupUser.SqlLogin);
+            }
+            catch (Exception ex)
+            {
+                throw new DatabaseException(string.Format("Erreur dans la suppression du contributeur '{0}' de la base de données' {1}' sur le serveur '{2}'", databaseGroupUser.SqlLogin, databaseGroupUser.DatabaseDB.NomBD, serverName), ex);
+            }
+
+            // Suppression du contributeur
+            db.DatabaseGroupUsers.Remove(databaseGroupUser);
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw new Exception(string.Format("Erreur dans la suppression du contributeur '{0}' de la base de données '{0}' dans le référentiel", databaseGroupUser.SqlLogin, databaseGroupUser.DatabaseDB.NomBD));
             }
 
             return true;

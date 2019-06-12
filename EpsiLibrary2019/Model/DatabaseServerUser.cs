@@ -1,7 +1,10 @@
 namespace EpsiLibrary2019.Model
 {
+    using System;
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using System.Data.Entity.Spatial;
 
     [Table("DatabaseServerUser")]
     public partial class DatabaseServerUser
@@ -21,7 +24,5 @@ namespace EpsiLibrary2019.Model
         public string UserLogin { get; set; }
 
         public virtual DatabaseServerName DatabaseServerName { get; set; }
-
-        public virtual DatabaseUserLogin DatabaseUserLogin { get; set; }
     }
 }

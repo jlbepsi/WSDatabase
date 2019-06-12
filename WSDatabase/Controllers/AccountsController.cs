@@ -6,16 +6,25 @@ using System.Web.Http.Description;
 using EpsiLibrary2019.BusinessLogic;
 using EpsiLibrary2019.Model;
 
+
+
+/*
+ * IMPORTANT:
+ * Pour les URL comportant un point (dans le login par exemple, 
+ * il faut ajouter la ligne suivante dans le fichier web.config:
+ *      <modules runAllManagedModulesForAllRequests="true">
+ */
+
 namespace WSDatabase.Controllers
 {
-    public class AccountController : SecureApiController
+    public class AccountsController : SecureApiController
     {
         private ServerAccountService service = new ServerAccountService();
 
         // GET: api/Account
         public List<DatabaseServerUser> GetServerAccounts()
         {
-            return new List<DatabaseServerUser>();
+            return service.GetAccounts();
         }
 
         // GET: api/Account/5
@@ -27,7 +36,7 @@ namespace WSDatabase.Controllers
         /// <example>
         /// http://serveur/api/Account/byServerId/3
         /// </example>
-        [Route("api/Account/ServerId/{serverId}")]
+        [Route("api/Accounts/ServerId/{serverId}")]
         public List<DatabaseServerUser> GetAccountsByServerId(int serverId)
         {
             return service.GetAccountsByServerId(serverId);
@@ -40,10 +49,10 @@ namespace WSDatabase.Controllers
         /// <param name="userLogin">Le login C&D de l'étudiant</param>
         /// <returns>Une liste d'objets <code>DatabaseServerUser</code></returns>
         /// <example>
-        /// http://serveur/api/Account/UserLogin/test.v8/
+        /// http://serveur/api/Account/UserLogin/test.v8
         /// </example>
-        [Route("api/Account/UserLogin/{userLogin}")]
-        public List<DatabaseServerUser> GetAccountsByUserLogin(string userLogin)
+        [Route("api/Accounts/UserLogin/{userLogin}")]
+        public List<ServerAccounUsertModel> GetAccountsByUserLogin(string userLogin)
         {
             return service.GetAccountsByUserLogin(userLogin);
         }
@@ -57,8 +66,8 @@ namespace WSDatabase.Controllers
         /// <example>
         /// http://serveur/api/Account/SqlLogin/test.v8/
         /// </example>
-        [Route("api/Account/SqlLogin/{sqlLogin}")]
-        public List<DatabaseServerUser> GetAccountsBySqlLogin(string sqlLogin)
+        [Route("api/Accounts/SqlLogin/{sqlLogin}")]
+        public List<ServerAccounUsertModel> GetAccountsBySqlLogin(string sqlLogin)
         {
             return service.GetAccountsBySqlLogin(sqlLogin);
         }
@@ -74,7 +83,7 @@ namespace WSDatabase.Controllers
         /// http://serveur/api/Account/ServerId/0/UserLogin/test.v8/
         /// </example>
         [ResponseType(typeof(DatabaseServerUser))]
-        [Route("api/Account/ServerId/{serverId}/UserLogin/{userLogin}")]
+        [Route("api/Accounts/ServerId/{serverId}/UserLogin/{userLogin}")]
         public IHttpActionResult GetServerAccount(int serverId, string userLogin)
         {
             DatabaseServerUser databaseServerUser = service.GetAccountByServerLogin(serverId, userLogin);

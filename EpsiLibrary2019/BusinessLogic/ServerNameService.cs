@@ -12,13 +12,13 @@ namespace EpsiLibrary2019.BusinessLogic
 {
     public class ServerNameService
     {
-        private DatabaseContext db;
+        private ServiceEpsiContext db;
 
         public ServerNameService()
         {
-            this.db = new DatabaseContext();
+            this.db = new ServiceEpsiContext();
         }
-        public ServerNameService(DatabaseContext db)
+        public ServerNameService(ServiceEpsiContext db)
         {
             this.db = db;
         }
@@ -45,7 +45,7 @@ namespace EpsiLibrary2019.BusinessLogic
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!Exists(databaseServerName.ServerId))
+                if (!Exists(databaseServerName.Code))
                 {
                     return false;
                 }
@@ -69,7 +69,7 @@ namespace EpsiLibrary2019.BusinessLogic
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!Exists(databaseServerName.ServerId))
+                if (!Exists(databaseServerName.Code))
                 {
                     return false;
                 }
@@ -103,9 +103,9 @@ namespace EpsiLibrary2019.BusinessLogic
             }
         }
 
-        private bool Exists(int id)
+        private bool Exists(string code)
         {
-            return db.DatabaseServerNames.Count(e => e.ServerId == id) > 0;
+            return db.DatabaseServerNames.Count(e => e.Code.Equals(code, StringComparison.InvariantCultureIgnoreCase)) > 0;
         }
 
     }

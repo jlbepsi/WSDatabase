@@ -39,7 +39,7 @@ namespace EpsiLibrary2019.DataAccess
 
         #region Base de données
 
-        public abstract int GetDatabaseServerType();
+        public abstract string GetDatabaseServerType();
 
         public abstract bool TestUserConnection(string databaseName, string sqlLogin, string password);
         public abstract bool ExistsSqlLoginInDatabase(string sqlLogin, string databaseName);
@@ -69,26 +69,26 @@ namespace EpsiLibrary2019.DataAccess
 
 
         /** TODO : A compléter */
-        public static DatabaseManagement CreateDatabaseManagement(int serverId, string adresseIP)
+        public static DatabaseManagement CreateDatabaseManagement(string serverCode, string adresseIP)
         {
             EpsiLibrary2019.Utilitaires.ConfigurationManager config = EpsiLibrary2019.Utilitaires.ConfigurationManager.GetConfigurationManager();
-            if (config.GetValue("database.mock") == "1" || serverId == DatabaseValues.DBMOCK_TYPE)
+            if (config.GetValue("database.mock") == "1" || serverCode.Equals(DatabaseValues.DBMOCK_TYPE, StringComparison.InvariantCultureIgnoreCase))
             {
                 return new MockDatabaseManagement();
             }
 
-            if (serverId == DatabaseValues.MYSQL_TYPE)
+            if (serverCode.Equals(DatabaseValues.MYSQL_TYPE, StringComparison.InvariantCultureIgnoreCase))
             {
                 // On fixe l'adresse IP du serveur
                 string connectionString = string.Format(config.GetValue("database.server.mysql.connectionstring"), adresseIP);
                 return new DatabaseManagementMySQL(connectionString);
             }
-            else if (serverId == DatabaseValues.SQLSERVER_TYPE)
+            else if (serverCode.Equals(DatabaseValues.SQLSERVER_TYPE, StringComparison.InvariantCultureIgnoreCase))
             {
                 string connectionString = string.Format(config.GetValue("database.server.sqlserver.connectionstring"), adresseIP);
                 return new DatabaseManagementSQLServer(connectionString);
             }
-            else if (serverId == DatabaseValues.ORACLE_TYPE)
+            else if (serverCode.Equals(DatabaseValues.ORACLE_TYPE, StringComparison.InvariantCultureIgnoreCase))
             {
                 string connectionString = string.Format(config.GetValue("database.server.oracle.connectionstring"), adresseIP);
                 return new DatabaseManagementOracle(connectionString);

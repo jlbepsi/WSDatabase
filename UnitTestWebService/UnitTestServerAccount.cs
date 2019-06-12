@@ -31,7 +31,7 @@ namespace UnitTestWebService
             // Cela constitue aussi un test !
             ServerAccountModel serverAccount = new ServerAccountModel()
             {
-                ServerId = DatabaseValues.DBMOCK_TYPE,
+                ServerId = 0,
                 UserLogin = "UnitTest",
                 Password = "123ABC"
             };
@@ -66,7 +66,7 @@ namespace UnitTestWebService
             string login = string.Format("Test-{0}{1}{2}.{3}{4}", dateDuJour.Year, dateDuJour.Month, dateDuJour.Day, dateDuJour.Second, dateDuJour.Millisecond);
             ServerAccountModel serverAccount = new ServerAccountModel()
             {
-                ServerId = DatabaseValues.DBMOCK_TYPE,
+                ServerId = 0,
                 UserLogin = login,
                 Password = "123ABC"
             };
@@ -82,7 +82,7 @@ namespace UnitTestWebService
         {
             ServerAccountModel serverAccount = new ServerAccountModel()
             {
-                ServerId = DatabaseValues.DBMOCK_TYPE,
+                ServerId = 0,
                 UserLogin = "test.v8",
                 Password = "123ABC"
             };
@@ -93,7 +93,7 @@ namespace UnitTestWebService
         [TestMethod]
         public void TestRemoveAccount()
         {
-            DatabaseServerUser databaseServerUser = service.RemoveAccount(DatabaseValues.DBMOCK_TYPE, "UnitTest");
+            DatabaseServerUser databaseServerUser = service.RemoveAccount(0, "UnitTest");
 
             Assert.IsNotNull(databaseServerUser);
         }

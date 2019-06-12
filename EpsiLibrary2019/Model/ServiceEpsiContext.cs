@@ -5,19 +5,17 @@ namespace EpsiLibrary2019.Model
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
 
-    public partial class DatabaseContext : DbContext
+    public partial class ServiceEpsiContext : DbContext
     {
-        public DatabaseContext()
-            : base("name=DatabaseContext")
+        public ServiceEpsiContext()
+            : base("name=ServiceEpsiContext")
         {
         }
 
         public virtual DbSet<DatabaseDB> DatabaseDBs { get; set; }
         public virtual DbSet<DatabaseGroupUser> DatabaseGroupUsers { get; set; }
         public virtual DbSet<DatabaseServerName> DatabaseServerNames { get; set; }
-        public virtual DbSet<DatabaseServerType> DatabaseServerTypes { get; set; }
         public virtual DbSet<DatabaseServerUser> DatabaseServerUsers { get; set; }
-        public virtual DbSet<DatabaseUserLogin> DatabaseUserLogins { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -30,13 +28,30 @@ namespace EpsiLibrary2019.Model
                 .IsUnicode(false);
 
             modelBuilder.Entity<DatabaseDB>()
-                .HasMany(e => e.DatabaseGroupUser)
+                .HasMany(e => e.DatabaseGroupUsers)
                 .WithRequired(e => e.DatabaseDB)
                 .HasForeignKey(e => e.DbId)
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<DatabaseGroupUser>()
                 .Property(e => e.SqlLogin)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<DatabaseGroupUser>()
+                .Property(e => e.UserLogin)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<DatabaseGroupUser>()
+                .Property(e => e.UserFullName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<DatabaseGroupUser>()
+                .Property(e => e.AddedByUserLogin)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<DatabaseServerName>()
+                .Property(e => e.Code)
+                .IsFixedLength()
                 .IsUnicode(false);
 
             modelBuilder.Entity<DatabaseServerName>()
@@ -56,23 +71,15 @@ namespace EpsiLibrary2019.Model
                 .IsUnicode(false);
 
             modelBuilder.Entity<DatabaseServerName>()
-                .HasMany(e => e.DatabaseDB)
+                .HasMany(e => e.DatabaseDBs)
                 .WithRequired(e => e.DatabaseServerName)
+                .HasForeignKey(e => e.ServerId)
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<DatabaseServerName>()
-                .HasMany(e => e.DatabaseServerUser)
+                .HasMany(e => e.DatabaseServerUsers)
                 .WithRequired(e => e.DatabaseServerName)
-                .WillCascadeOnDelete(false);
-
-            modelBuilder.Entity<DatabaseServerType>()
-                .Property(e => e.Name)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<DatabaseServerType>()
-                .HasMany(e => e.DatabaseServerName)
-                .WithRequired(e => e.DatabaseServerType)
-                .HasForeignKey(e => e.ServerTypeId)
+                .HasForeignKey(e => e.ServerId)
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<DatabaseServerUser>()
@@ -82,23 +89,6 @@ namespace EpsiLibrary2019.Model
             modelBuilder.Entity<DatabaseServerUser>()
                 .Property(e => e.UserLogin)
                 .IsUnicode(false);
-
-            modelBuilder.Entity<DatabaseUserLogin>()
-                .Property(e => e.UserLogin)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<DatabaseUserLogin>()
-                .Property(e => e.UserNom)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<DatabaseUserLogin>()
-                .Property(e => e.UserPrenom)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<DatabaseUserLogin>()
-                .HasMany(e => e.DatabaseServerUser)
-                .WithRequired(e => e.DatabaseUserLogin)
-                .WillCascadeOnDelete(false);
         }
     }
 }
