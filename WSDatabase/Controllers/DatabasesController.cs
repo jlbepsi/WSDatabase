@@ -8,6 +8,7 @@ using System.Web.Http.Description;
 
 using EpsiLibrary2019.Model;
 using EpsiLibrary2019.BusinessLogic;
+using EpsiLibrary2019.Utilitaires;
 
 namespace WSDatabase.Controllers
 {
@@ -24,9 +25,12 @@ namespace WSDatabase.Controllers
         /// <example>
         /// http://serveur/api/databasess/3
         /// </example>
+        [JWTAuthenticationFilter]
         public List<DatabaseDB> GetDatabases()
         {
-            return service.GetDatabases();
+            List<DatabaseDB> list = service.GetDatabases();
+            FillPermissions(list, this.GetJWTIdentity());
+            return list;
         }
 
         // GET: api/Database
@@ -38,10 +42,13 @@ namespace WSDatabase.Controllers
         /// <example>
         /// http://serveur/api/databases/ServerId/3
         /// </example>
+        [JWTAuthenticationFilter]
         [Route("api/Databases/ServerId/{serverId}")]
         public List<DatabaseDB> GetDatabasesByServerId(int serverId)
         {
-            return service.GetDatabasesByServerId(serverId);
+            List<DatabaseDB> list = service.GetDatabasesByServerId(serverId);
+            FillPermissions(list, this.GetJWTIdentity());
+            return list;
         }
 
 
@@ -54,10 +61,13 @@ namespace WSDatabase.Controllers
         /// <example>
         /// http://serveur/api/databases/ServerCode/mysql
         /// </example>
+        [JWTAuthenticationFilter]
         [Route("api/Databases/ServerCode/{serverCode}")]
         public List<DatabaseDB> GetDatabasesByServerType(string serverCode)
         {
-            return service.GetDatabasesByServerCode(serverCode);
+            List<DatabaseDB> list = service.GetDatabasesByServerCode(serverCode);
+            FillPermissions(list, this.GetJWTIdentity());
+            return list;
         }
 
         // GET: api/Database
@@ -69,10 +79,13 @@ namespace WSDatabase.Controllers
         /// <example>
         /// http://serveur/api/databases/Login/test.v8/
         /// </example>
+        [JWTAuthenticationFilter]
         [Route("api/Databases/Login/{userLogin}")]
         public List<DatabaseDB> GetDatabasesByLogin(string userLogin)
         {
-            return service.GetDatabasesByLogin(userLogin);
+            List<DatabaseDB> list = service.GetDatabasesByLogin(userLogin);
+            FillPermissions(list, this.GetJWTIdentity());
+            return list;
         }
 
         // GET: api/Database/5
@@ -84,6 +97,7 @@ namespace WSDatabase.Controllers
         /// <example>
         /// http://serveur/api/databases/3
         /// </example>
+        [JWTAuthenticationFilter]
         [ResponseType(typeof(DatabaseDB))]
         public IHttpActionResult GetDatabase(int id)
         {
@@ -93,6 +107,7 @@ namespace WSDatabase.Controllers
                 return NotFound();
             }
 
+            FillPermissions(databaseDB, this.GetJWTIdentity());
             return Ok(databaseDB);
         }
 
@@ -107,6 +122,7 @@ namespace WSDatabase.Controllers
         /// L'enveloppe Body contient le JSON de le la base de données a ajouter :
         /// <code>{ "ServerId":0,"NomBD":"DBTest2","UserLogin":"test.v8","UserNom":"V8","UserPrenom":"Test","Commentaire":"Aucun" }</code>
         /// </example>
+        [JWTAuthenticationFilter]
         [ResponseType(typeof(DatabaseDB))]
         public IHttpActionResult PostDatabaseDB(DatabaseModel database)
         {
@@ -126,6 +142,7 @@ namespace WSDatabase.Controllers
                 return Conflict();
             }
 
+            FillPermissions(databaseDB, this.GetJWTIdentity());
             return CreatedAtRoute("DefaultApi", new { id = databaseDB.Id }, databaseDB);
         }
 
@@ -136,6 +153,7 @@ namespace WSDatabase.Controllers
         /// <param name="id">L'identifiant de la base de données</param>
         /// <param name="database">L'objet DatabaseModel contenant les données</param>
         /// <returns>Retourne le code statut HTTP NoContent si la modification a été faite, BadRequest sinon</returns>
+        [JWTAuthenticationFilter]
         [ResponseType(typeof(void))]
         public IHttpActionResult PutDatabaseDB(int id, DatabaseModel database)
         {
@@ -149,7 +167,7 @@ namespace WSDatabase.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (id != database.ServerId)
+            if (id != database.Id)
             {
                 return BadRequest();
             }
@@ -168,6 +186,7 @@ namespace WSDatabase.Controllers
         /// </summary>
         /// <param name="id">L'identifiant de la base de données</param>
         /// <returns>Retourne le code statut HTTP Ok si la suppression a été faite, Forbidden ou NotFound sinon</returns>
+        [JWTAuthenticationFilter]
         [ResponseType(typeof(DatabaseDB))]
         public IHttpActionResult DeleteDatabaseDB(int id)
         {
@@ -185,6 +204,71 @@ namespace WSDatabase.Controllers
                 return NotFound();
 
             return Ok(databaseDB);
+        }
+
+
+        /// <summary>
+        /// Affecte les permissions pour chaque base de données de la liste
+        /// en fonction de l'utilsateur connecté
+        /// </summary>
+        /// <param name="list"></param>
+        /// <param name="jWTAuthenticationIdentity"></param>
+        private void FillPermissions(List<DatabaseDB> list, JWTAuthenticationIdentity jwtAuthenticationIdentity)
+        {
+            foreach (DatabaseDB databaseDB in list)
+            {
+                FillPermissions(databaseDB, jwtAuthenticationIdentity);
+            }
+        }
+
+        private void FillPermissions(DatabaseDB databaseDB, JWTAuthenticationIdentity jwtAuthenticationIdentity)
+        {
+            if (jwtAuthenticationIdentity == null || string.IsNullOrEmpty(jwtAuthenticationIdentity.Name) )
+            {
+                databaseDB.CanBeDeleted = databaseDB.CanBeUpdated = databaseDB.CanAddGroupUser = false;
+                if (databaseDB.DatabaseGroupUsers != null)
+                {
+                    foreach (DatabaseGroupUser user in databaseDB.DatabaseGroupUsers)
+                    {
+                        user.CanBeUpdated = user.CanBeDeleted = false;
+                    }
+                }
+            }
+            else
+            {
+                // Si l'utilisateur est administrateur il peut faire toutes les opérations
+                int groupType = DatabaseGroupUserPermissions.GetGroupType(databaseDB.DatabaseGroupUsers, jwtAuthenticationIdentity.Name);
+                if (groupType == DatabaseGroupUserPermissions.ADMINISTRATEUR)
+                {
+                    databaseDB.CanBeDeleted = databaseDB.CanBeUpdated = databaseDB.CanAddGroupUser = true;
+                    if (databaseDB.DatabaseGroupUsers != null)
+                    {
+                        foreach (DatabaseGroupUser user in databaseDB.DatabaseGroupUsers)
+                        {
+                            user.CanBeUpdated = user.CanBeDeleted = true;
+                        }
+                    }
+                }
+                else
+                {
+                    databaseDB.CanBeDeleted = databaseDB.CanBeUpdated = databaseDB.CanAddGroupUser = false;
+                    if (databaseDB.DatabaseGroupUsers != null)
+                    {
+                        foreach (DatabaseGroupUser user in databaseDB.DatabaseGroupUsers)
+                        {
+                            // Si l'utilisateur connecté est l'utilisateur alors il peut faire les actions
+                            if (!String.IsNullOrWhiteSpace(user.UserLogin) &&  user.UserLogin.Equals(jwtAuthenticationIdentity.Name, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                user.CanBeUpdated = user.CanBeDeleted = true;
+                            }
+                            else
+                            {
+                                user.CanBeUpdated = user.CanBeDeleted = false;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         protected override void Dispose(bool disposing)

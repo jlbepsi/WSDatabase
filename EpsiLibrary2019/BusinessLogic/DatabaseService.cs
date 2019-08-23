@@ -108,6 +108,7 @@ namespace EpsiLibrary2019.BusinessLogic
             }
             catch (Exception ex)
             {
+                LogManager.GetLogger().Error(ex);
                 throw new DatabaseException(string.Format("Erreur dans l'ajout de la base de données {0} sur le serveur '{1}'", database.ToString(), serverName), ex);
             }
 
@@ -130,6 +131,7 @@ namespace EpsiLibrary2019.BusinessLogic
                 {
                     DbId = databaseDB.Id,
                     UserLogin = databaseServerUser.UserLogin,
+                    UserFullName = database.UserFullName,
                     SqlLogin = databaseServerUser.SqlLogin,
                     GroupType = DatabaseValues.ADMINISTRATEUR,
                     AddedByUserLogin = databaseServerUser.UserLogin
@@ -145,6 +147,7 @@ namespace EpsiLibrary2019.BusinessLogic
                 }
                 else
                 {
+                    LogManager.GetLogger().Error(ex);
                     throw new DatabaseException(string.Format("Erreur dans l'ajout de la base de données dans le référentiel", database.ToString()), ex);
                 }
             }
@@ -168,8 +171,9 @@ namespace EpsiLibrary2019.BusinessLogic
             {
                 db.SaveChanges();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
+                LogManager.GetLogger().Error(ex);
                 throw new Exception(string.Format("Erreur dans la modification de la base de données '{0}' dans le référentiel", database.ToString()));
             }
 
@@ -290,6 +294,7 @@ namespace EpsiLibrary2019.BusinessLogic
             }
             catch (Exception ex)
             {
+                LogManager.GetLogger().Error(ex);
                 throw new DatabaseException(string.Format("Erreur dans l'ajout du contributeur {0} sur le serveur '{1}'", groupUserModel.ToString(), serverName), ex);
             }
 
@@ -310,6 +315,7 @@ namespace EpsiLibrary2019.BusinessLogic
             }
             catch (DbUpdateConcurrencyException ex)
             {
+                LogManager.GetLogger().Error(ex);
                 throw new DatabaseException(string.Format("Erreur dans l'ajout du contributeur {0} dans le référentiel", groupUserModel.ToString()), ex);
             }
 
@@ -386,14 +392,29 @@ namespace EpsiLibrary2019.BusinessLogic
             }
             catch (Exception ex)
             {
+                LogManager.GetLogger().Error(ex);
                 throw new DatabaseException(string.Format("Erreur dans l'ajout du contributeur {0} sur le serveur '{1}'", groupUserModel.ToString(), serverName), ex);
+            }
+
+            try
+            {
+                // Maj du type
+                databaseGroupUser.GroupType = groupUserModel.GroupType;
+                // Modification du contributeur dans le groupe
+                db.Entry(databaseGroupUser).State = EntityState.Modified;
+                this.db.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                LogManager.GetLogger().Error(ex);
+                throw new DatabaseException(string.Format("Erreur dans la modification du contributeur {0} dans le référentiel", groupUserModel.ToString()), ex);
             }
 
             return true;
         }
 
 
-        public DatabaseGroupUser RemoveContributor(string userLogin, string sqlLogin, int databaseId)
+        public DatabaseGroupUser RemoveContributor(string sqlLogin, int databaseId)
         {
             DatabaseGroupUser databaseGroupUser = GetDatabaseGroupUserWithSqlLogin(sqlLogin, databaseId);
             if (databaseGroupUser == null)
@@ -410,8 +431,9 @@ namespace EpsiLibrary2019.BusinessLogic
             switch (groupType)
             {
                 case DatabaseValues.ADMINISTRATEUR: return "Tous les droits";
-                case DatabaseValues.CRUD: return "CRUD enregistrements et tables";
-                case DatabaseValues.SELECT:
+                case DatabaseValues.MODIFICATION: return "CRUD enregistrements et tables";
+                case DatabaseValues.ECRITURE: return "CRUD enregistrements et tables";
+                case DatabaseValues.LECTURE:
                 default: return "SELECT uniquement";
             }
         }
@@ -449,6 +471,7 @@ namespace EpsiLibrary2019.BusinessLogic
             }
             catch (Exception ex)
             {
+                LogManager.GetLogger().Error(ex);
                 throw new DatabaseException(string.Format("Erreur dans la suppression de la base de données {0} sur le serveur '{1}'", database.ToString(), serverName), ex);
             }
 
@@ -458,8 +481,9 @@ namespace EpsiLibrary2019.BusinessLogic
             {
                 db.SaveChanges();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
+                LogManager.GetLogger().Error(ex);
                 throw new Exception(string.Format("Erreur dans la suppression des contributeurs de la base de données '{0}' dans le référentiel", database.ToString()));
             }
 
@@ -469,8 +493,9 @@ namespace EpsiLibrary2019.BusinessLogic
             {
                 db.SaveChanges();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
+                LogManager.GetLogger().Error(ex);
                 throw new Exception(string.Format("Erreur dans la suppression de la base de données '{0}' dans le référentiel", database.ToString()));
             }
 
@@ -497,6 +522,7 @@ namespace EpsiLibrary2019.BusinessLogic
             }
             catch (Exception ex)
             {
+                LogManager.GetLogger().Error(ex);
                 throw new DatabaseException(string.Format("Erreur dans la suppression du contributeur '{0}' de la base de données' {1}' sur le serveur '{2}'", databaseGroupUser.SqlLogin, databaseGroupUser.DatabaseDB.NomBD, serverName), ex);
             }
 
@@ -506,8 +532,9 @@ namespace EpsiLibrary2019.BusinessLogic
             {
                 db.SaveChanges();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
+                LogManager.GetLogger().Error(ex);
                 throw new Exception(string.Format("Erreur dans la suppression du contributeur '{0}' de la base de données '{0}' dans le référentiel", databaseGroupUser.SqlLogin, databaseGroupUser.DatabaseDB.NomBD));
             }
 

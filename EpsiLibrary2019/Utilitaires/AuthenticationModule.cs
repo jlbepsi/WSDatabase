@@ -81,8 +81,9 @@ namespace EpsiLibrary2019.Utilitaires
                 fs.Read(rawData, 0, rawData.Length);
                 if (rawData != null)
                 {
-                    x509 = new X509Certificate2();
-                    x509.Import(rawData);
+                    x509 = new X509Certificate2(rawData);
+                    /*x509 = new X509Certificate2();
+                    x509.Import(rawData);*/
                 }
             }
             return x509;

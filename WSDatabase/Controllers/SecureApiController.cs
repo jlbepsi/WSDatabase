@@ -36,7 +36,7 @@ namespace WSDatabase.Controllers
              *  ou 
              *  - le rôle est ROLE_USER et l'utilisateur authentifié pat le token est l'utilisateur qui fait la modification
              */
-            if (!(this.RequestContext.Principal.IsInRole("ROLE_SUPER_ADMIN") ||
+            if (! (this.RequestContext.Principal.IsInRole("ROLE_SUPER_ADMIN") ||
                   (this.RequestContext.Principal.IsInRole("ROLE_USER") && this.RequestContext.Principal.Identity.Name.Equals(userLogin, System.StringComparison.InvariantCultureIgnoreCase))))
             {
                 // return StatusCode(HttpStatusCode.Forbidden);

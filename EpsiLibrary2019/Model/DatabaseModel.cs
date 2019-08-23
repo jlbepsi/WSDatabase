@@ -12,6 +12,7 @@ namespace EpsiLibrary2019.Model
         public int ServerId { get; set; }
         public string NomBD { get; set; }
         public string UserLogin { get; set; }
+        public string UserFullName { get; set; }
         public string Commentaire { get; set; }
 
         public override string ToString()

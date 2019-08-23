@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using EpsiLibrary2019.Model;
+using EpsiLibrary2019.Utilitaires;
 
 namespace EpsiLibrary2019.BusinessLogic
 {
@@ -43,7 +44,7 @@ namespace EpsiLibrary2019.BusinessLogic
             {
                 db.SaveChanges();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
                 if (!Exists(databaseServerName.Code))
                 {
@@ -51,6 +52,7 @@ namespace EpsiLibrary2019.BusinessLogic
                 }
                 else
                 {
+                    LogManager.GetLogger().Error(ex);
                     throw new Exception("Erreur dans l'ajout du serveur");
                 }
             }
@@ -67,7 +69,7 @@ namespace EpsiLibrary2019.BusinessLogic
             {
                 db.SaveChanges();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
                 if (!Exists(databaseServerName.Code))
                 {
@@ -75,6 +77,7 @@ namespace EpsiLibrary2019.BusinessLogic
                 }
                 else
                 {
+                    LogManager.GetLogger().Error(ex);
                     throw new Exception("Erreur dans la modification du serveur");
                 }
             }

@@ -34,25 +34,33 @@ namespace WSDatabase.Controllers
 
         private bool IsUserAuthorized(HttpActionContext actionContext)
         {
-            string token = FetchFromHeader(actionContext); // fetch authorization token from header
-
-
-            if (token != null && !String.IsNullOrWhiteSpace(token))
+            try
             {
-                AuthenticationModule auth = new AuthenticationModule();
-                JwtSecurityToken userPayloadToken = auth.ValidateToken(token);
+                string token = FetchFromHeader(actionContext); // fetch authorization token from header
 
-                if (userPayloadToken != null)
+
+                if (token != null && !String.IsNullOrWhiteSpace(token))
                 {
-                    JWTAuthenticationIdentity identity = AuthenticationModule.PopulateUserIdentity(userPayloadToken);
+                    AuthenticationModule auth = new AuthenticationModule();
+                    JwtSecurityToken userPayloadToken = auth.ValidateToken(token);
 
-                    if (this.role == null || identity.Roles.Contains(this.role))
+                    if (userPayloadToken != null)
                     {
-                        actionContext.ControllerContext.RequestContext.Principal = identity.GetPrincipal();
-                        return true;
+                        JWTAuthenticationIdentity identity = AuthenticationModule.PopulateUserIdentity(userPayloadToken);
+
+                        if (this.role == null || identity.Roles.Contains(this.role))
+                        {
+                            actionContext.ControllerContext.RequestContext.Principal = identity.GetPrincipal();
+                            return true;
+                        }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                LogManager.GetLogger().Error(ex);
+            }
+
             return false;
         }
 

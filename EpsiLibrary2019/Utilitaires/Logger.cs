@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 
@@ -28,10 +30,6 @@ namespace EpsiLibrary2019.Utilitaires
             {
                 appender.Write(level,string.Format("{0} - {1} : {2}", level, DateTime.Now.ToString("yyyyMMdd HH:mm"), message));
             }
-        }
-        private void WriteMessage(string level,  Exception exception)
-        {
-            WriteMessage(level, string.Format("\n\t{0}\n\t{1}", exception.Message, exception.StackTrace));
         }
         private void WriteMessage(string level, object message, Exception exception)
         {
@@ -62,17 +60,26 @@ namespace EpsiLibrary2019.Utilitaires
             WriteMessage("WARNING", message, exception);
         }
 
-        public void Error(object message)
+        public void Error(object message,
+                        [CallerFilePath] string file = "",
+                        [CallerMemberName] string member = "",
+                        [CallerLineNumber] int line = 0)
         {
-            WriteMessage("ERROR", message);
+            WriteMessage("ERROR", String.Format("{0}_{1}({2}): {3}", Path.GetFileName(file), member, line, message));
         }
-        public void Error(Exception exception)
+        public void Error(Exception exception,
+                        [CallerFilePath] string file = "",
+                        [CallerMemberName] string member = "",
+                        [CallerLineNumber] int line = 0)
         {
-            WriteMessage("ERROR", exception);
+            WriteMessage("ERROR", String.Format("{0}_{1}({2}): {3}", Path.GetFileName(file), member, line, exception.Message), exception);
         }
-        public void Error(object message, Exception exception)
+        public void Error(object message, Exception exception,
+                        [CallerFilePath] string file = "",
+                        [CallerMemberName] string member = "",
+                        [CallerLineNumber] int line = 0)
         {
-            WriteMessage("ERROR", message, exception);
+            WriteMessage("ERROR", String.Format("{0}_{1}({2}): {3}", Path.GetFileName(file), member, line, message), exception);
         }
 
         public void Fatal(object message)

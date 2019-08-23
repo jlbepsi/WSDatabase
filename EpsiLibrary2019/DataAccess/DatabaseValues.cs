@@ -14,8 +14,9 @@ namespace EpsiLibrary2019.DataAccess
         public const string ORACLE_TYPE = "ORACLE";
 
 
-        public const int ADMINISTRATEUR = 0;
-        public const int CRUD = 1;
-        public const int SELECT = 2;
+        public const int ADMINISTRATEUR = 1;
+        public const int MODIFICATION = 2;
+        public const int ECRITURE = 3;
+        public const int LECTURE = 4;
     }
 }

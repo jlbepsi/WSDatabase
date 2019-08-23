@@ -2,7 +2,7 @@
 <epsi.config>
   <logger>
     <appender>
-      <textfile value="I:\Siteweb\Logs\logs_%d.txt" />
+      <textfile value="W:\Siteweb\Logs\logs_%d.txt" />
       <mail value="admin.reseau@montpellier-epsi.fr" />
     </appender>
   </logger>
@@ -13,7 +13,7 @@
 
   <security>
     <keys>
-      <public value="G:\Developpement\C#\WSDatabase\keys\public_key.der" />
+      <public value="G:\Developpement\C#\WSDatabase\keys\public_cert.crt" />
     </keys>
   </security>
 

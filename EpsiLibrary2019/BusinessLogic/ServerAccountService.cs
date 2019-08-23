@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using EpsiLibrary2019.DataAccess;
 using EpsiLibrary2019.Model;
+using EpsiLibrary2019.Utilitaires;
 
 namespace EpsiLibrary2019.BusinessLogic
 {
@@ -38,7 +39,37 @@ namespace EpsiLibrary2019.BusinessLogic
 
         public List<ServerAccounUsertModel> GetAccountsByUserLogin(string userLogin)
         {
-            var list = from dsn in db.DatabaseServerNames
+            List<ServerAccounUsertModel> list = new List<ServerAccounUsertModel>();
+
+            // Liste des serveurs
+            var servers = db.DatabaseServerNames.ToList();
+            // Liste des comptes de l'utilisateur
+            var accounts = db.DatabaseServerUsers.Where(su => su.UserLogin.Equals(userLogin, StringComparison.InvariantCultureIgnoreCase)).ToList();
+
+            // parcours des serveurs
+            foreach(DatabaseServerName serverName in servers)
+            {
+                ServerAccounUsertModel accounUsertModel = new ServerAccounUsertModel()
+                {
+                    DatabaseServerName = serverName,
+                    SqlLogin = null,
+                    UserLogin = null
+                };
+
+                // Le compte existe-t-il ?
+                DatabaseServerUser account = accounts.Find(ac => ac.ServerId == serverName.Id);
+                if (account != null)
+                {
+                    accounUsertModel.SqlLogin = account.SqlLogin;
+                    accounUsertModel.UserLogin = account.UserLogin;
+                }
+
+                list.Add(accounUsertModel);
+            }
+
+            return list;
+            
+            /*var list = from dsn in db.DatabaseServerNames
                        join dsu in db.DatabaseServerUsers on dsn.Id equals dsu.ServerId into dsuLeft
                        from subdsu in dsuLeft.DefaultIfEmpty()
                        where subdsu.UserLogin.Equals(userLogin, StringComparison.InvariantCultureIgnoreCase) || subdsu.UserLogin == null
@@ -49,12 +80,42 @@ namespace EpsiLibrary2019.BusinessLogic
                            UserLogin = subdsu.UserLogin,
                        };
 
-            return list.ToList();
+            return list.ToList();*/
         }
 
         public List<ServerAccounUsertModel> GetAccountsBySqlLogin(string sqlLogin)
         {
-            var list = from dsn in db.DatabaseServerNames
+            List<ServerAccounUsertModel> list = new List<ServerAccounUsertModel>();
+
+            // Liste des serveurs
+            var servers = db.DatabaseServerNames.ToList();
+            // Liste des comptes de l'utilisateur
+            var accounts = db.DatabaseServerUsers.Where(su => su.SqlLogin.Equals(sqlLogin, StringComparison.InvariantCultureIgnoreCase)).ToList();
+
+            // parcours des serveurs
+            foreach (DatabaseServerName serverName in servers)
+            {
+                ServerAccounUsertModel accounUsertModel = new ServerAccounUsertModel()
+                {
+                    DatabaseServerName = serverName,
+                    SqlLogin = null,
+                    UserLogin = null
+                };
+
+                // Le compte existe-t-il ?
+                DatabaseServerUser account = accounts.Find(ac => ac.ServerId == serverName.Id);
+                if (account != null)
+                {
+                    accounUsertModel.SqlLogin = account.SqlLogin;
+                    accounUsertModel.UserLogin = account.UserLogin;
+                }
+
+                list.Add(accounUsertModel);
+            }
+
+            return list;
+
+            /*var list = from dsn in db.DatabaseServerNames
                        join dsu in db.DatabaseServerUsers on dsn.Id equals dsu.ServerId into dsuLeft
                        from subdsu in dsuLeft.DefaultIfEmpty()
                        where subdsu.SqlLogin.Equals(sqlLogin, StringComparison.InvariantCultureIgnoreCase) || subdsu.SqlLogin == null
@@ -65,7 +126,7 @@ namespace EpsiLibrary2019.BusinessLogic
                            UserLogin = subdsu.UserLogin,
                        };
 
-            return list.ToList();
+            return list.ToList();*/
         }
 
         public DatabaseServerUser GetAccountByServerLogin(int serverId, string userLogin)
@@ -107,6 +168,7 @@ namespace EpsiLibrary2019.BusinessLogic
             }
             catch (Exception ex)
             {
+                LogManager.GetLogger().Error(ex);
                 throw new DatabaseException(string.Format("Erreur dans l'ajout du compte utilisateur {0} sur le serveur '{1}'", serverAccount.ToString(), serverName), ex);
             }
              
@@ -118,6 +180,7 @@ namespace EpsiLibrary2019.BusinessLogic
             }
             catch (DbUpdateConcurrencyException ex)
             {
+                LogManager.GetLogger().Error(ex);
                 throw new DatabaseException(string.Format("Erreur dans l'ajout du compte utilisateur {0} dans le référentiel", serverAccount.ToString()), ex);
             }
 
@@ -145,6 +208,7 @@ namespace EpsiLibrary2019.BusinessLogic
             }
             catch (Exception ex)
             {
+                LogManager.GetLogger().Error(ex);
                 throw new DatabaseException(String.Format("Erreur dans l'obtention du compte utilisateur {0} dans le référentiel", serverAccount.ToString()), ex);
             }
 
@@ -155,8 +219,9 @@ namespace EpsiLibrary2019.BusinessLogic
                 // Modification du mot de passe du login SQL sur le serveur
                 management.AddOrUpdateUser(databaseServerUser.SqlLogin, serverAccount.Password);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogManager.GetLogger().Error(ex);
                 throw new DatabaseException(String.Format("Erreur dans la modification du compte utilisateur {0} sur le serveur '{1}'", serverAccount.ToString(), serverName));
             }
 
@@ -179,6 +244,7 @@ namespace EpsiLibrary2019.BusinessLogic
             }
             catch (Exception ex)
             {
+                LogManager.GetLogger().Error(ex);
                 throw new DatabaseException(String.Format("Erreur dans l'obtention du compte utilisateur {0} du serveur '{1}' dans le référentiel", userLogin, serverName), ex);
             }
 
@@ -191,6 +257,7 @@ namespace EpsiLibrary2019.BusinessLogic
             }
             catch (Exception ex)
             {
+                LogManager.GetLogger().Error(ex);
                 throw new DatabaseException(String.Format("Erreur dans la suppression du compte utilisateur {0} sur le serveur '{1}'", userLogin, serverName), ex);
             }
 
@@ -205,8 +272,9 @@ namespace EpsiLibrary2019.BusinessLogic
                 db.DatabaseServerUsers.Remove(databaseServerUser);
                 db.SaveChanges();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogManager.GetLogger().Error(ex);
                 throw new DatabaseException(String.Format("Erreur dans la suppression du compte utilisateur {0} sur le serveur '{1}' dans le référentiel", userLogin, serverName));
             }
 

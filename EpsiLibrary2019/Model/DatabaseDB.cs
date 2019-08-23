@@ -27,7 +27,19 @@ namespace EpsiLibrary2019.Model
 
         public string Commentaire { get; set; }
 
+
+        /*
+         * Propriétés ajoutées
+         */
+        [NotMapped]
+        public bool CanBeDeleted { get; set; }
+        [NotMapped]
+        public bool CanBeUpdated { get; set; }
+        [NotMapped]
+        public bool CanAddGroupUser { get; set; }
+
         public virtual DatabaseServerName DatabaseServerName { get; set; }
+
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<DatabaseGroupUser> DatabaseGroupUsers { get; set; }

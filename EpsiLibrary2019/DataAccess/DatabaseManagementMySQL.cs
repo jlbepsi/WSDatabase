@@ -144,8 +144,8 @@ namespace EpsiLibrary2019.DataAccess
 
             try
             {
+                Open();
                 cmd.Parameters.Add(new MySqlParameter("@userName", sqlLogin));
-
                 cmd.ExecuteNonQuery();
             }
             catch (MySqlException ex)
@@ -286,13 +286,7 @@ namespace EpsiLibrary2019.DataAccess
         public override void AddContributor(string databaseName, string sqlLogin, int groupType, string password)
         {
             // Ajout des droits
-            string mysqlRights = "";
-            switch (groupType)
-            {
-                case EpsiLibrary2019.DataAccess.DatabaseValues.ADMINISTRATEUR: mysqlRights = "SELECT , UPDATE , INSERT , DELETE , CREATE , DROP , INDEX , ALTER , CREATE VIEW , SHOW VIEW , EXECUTE"; break;
-                case EpsiLibrary2019.DataAccess.DatabaseValues.CRUD: mysqlRights = "SELECT, UPDATE, INSERT, DELETE, EXECUTE"; break;
-                case EpsiLibrary2019.DataAccess.DatabaseValues.SELECT: mysqlRights = "SELECT"; break;
-            }
+            string mysqlRights = GetServerRights(groupType);
 
             try
             {
@@ -327,13 +321,7 @@ namespace EpsiLibrary2019.DataAccess
             // L'utilisateur sqlLogin doit exister
 
             // Ajout des droits
-            string mysqlRights = "";
-            switch (groupType)
-            {
-                case EpsiLibrary2019.DataAccess.DatabaseValues.ADMINISTRATEUR: mysqlRights = "SELECT , UPDATE , INSERT , DELETE , CREATE , DROP , INDEX , ALTER , CREATE VIEW , SHOW VIEW , EXECUTE"; break;
-                case EpsiLibrary2019.DataAccess.DatabaseValues.CRUD: mysqlRights = "SELECT, UPDATE, INSERT, DELETE, EXECUTE"; break;
-                case EpsiLibrary2019.DataAccess.DatabaseValues.SELECT: mysqlRights = "SELECT"; break;
-            }
+            string mysqlRights = GetServerRights(groupType);
 
             try
             {
@@ -420,6 +408,22 @@ namespace EpsiLibrary2019.DataAccess
 
             return sqlLogin.ToLower();
         }
+
+        public string GetServerRights(int groupType)
+        {
+            string serverRights = "";
+            switch (groupType)
+            {
+                case EpsiLibrary2019.DataAccess.DatabaseValues.ADMINISTRATEUR:
+                case EpsiLibrary2019.DataAccess.DatabaseValues.MODIFICATION:
+                    serverRights = "SELECT , UPDATE , INSERT , DELETE , CREATE , DROP , INDEX , ALTER , CREATE VIEW , CREATE ROUTINE, TRIGGER, SHOW VIEW , EXECUTE"; break;
+                case EpsiLibrary2019.DataAccess.DatabaseValues.ECRITURE: serverRights = "SELECT, UPDATE, INSERT, DELETE, EXECUTE"; break;
+                case EpsiLibrary2019.DataAccess.DatabaseValues.LECTURE: serverRights = "SELECT"; break;
+            }
+
+            return serverRights;
+        }
+
 
         #endregion
     }

@@ -114,6 +114,7 @@
     <Compile Include="Utilitaires\Appenders\MailLogAppender.cs" />
     <Compile Include="Utilitaires\AuthenticationModule.cs" />
     <Compile Include="Utilitaires\ConfigurationManager.cs" />
+    <Compile Include="Utilitaires\DatabaseGroupUserPermissions.cs" />
     <Compile Include="Utilitaires\GoogleMail\SmtpGMail.cs" />
     <Compile Include="Utilitaires\ILogAppender.cs" />
     <Compile Include="Utilitaires\JWTAuthenticationIdentity.cs" />

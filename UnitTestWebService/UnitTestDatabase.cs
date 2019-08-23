@@ -109,7 +109,7 @@ namespace UnitTestWebService
                 DbId = 11,
                 SqlLogin = "ajoutTestUnit",
                 Password = "456ABC",
-                GroupType = DatabaseValues.CRUD
+                GroupType = DatabaseValues.ECRITURE
             };
             Assert.IsTrue(service.UpdateContributor(groupUserModel));
         }

@@ -71,6 +71,8 @@ namespace EpsiLibrary2019.DataAccess
         /** TODO : A compléter */
         public static DatabaseManagement CreateDatabaseManagement(string serverCode, string adresseIP)
         {
+            serverCode = serverCode.Trim();
+
             EpsiLibrary2019.Utilitaires.ConfigurationManager config = EpsiLibrary2019.Utilitaires.ConfigurationManager.GetConfigurationManager();
             if (config.GetValue("database.mock") == "1" || serverCode.Equals(DatabaseValues.DBMOCK_TYPE, StringComparison.InvariantCultureIgnoreCase))
             {

@@ -51,8 +51,10 @@ namespace EpsiLibrary2019.DataAccess
             try
             {
                 Open();
-                SqlCommand cmd = new SqlCommand("DatabaseExistsUserInDB", GetSqlConnection());
-                cmd.CommandType = CommandType.StoredProcedure;
+                SqlCommand cmd = new SqlCommand("DatabaseExistsUserInDB", GetSqlConnection())
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
 
                 cmd.Parameters.Add(new SqlParameter("@dbName", databaseName));
                 cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
@@ -81,8 +83,10 @@ namespace EpsiLibrary2019.DataAccess
             try
             {
                 Open();
-                SqlCommand cmd = new SqlCommand("DatabaseExistsUser", GetSqlConnection());
-                cmd.CommandType = CommandType.StoredProcedure;
+                SqlCommand cmd = new SqlCommand("DatabaseExistsUser", GetSqlConnection())
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
 
                 cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
                 SqlParameter exists = cmd.Parameters.Add("@exists", SqlDbType.Int);
@@ -108,8 +112,10 @@ namespace EpsiLibrary2019.DataAccess
             try
             {
                 Open();
-                SqlCommand cmd = new SqlCommand("DatabaseAddOrUpdateUser", GetSqlConnection());
-                cmd.CommandType = CommandType.StoredProcedure;
+                SqlCommand cmd = new SqlCommand("DatabaseAddOrUpdateUser", GetSqlConnection())
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
 
                 cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
                 cmd.Parameters.Add(new SqlParameter("@password", password));
@@ -133,8 +139,10 @@ namespace EpsiLibrary2019.DataAccess
                 Open();
 
                 string storeProcedure = "DatabaseRemoveUser";
-                SqlCommand cmd = new SqlCommand(storeProcedure, GetSqlConnection());
-                cmd.CommandType = CommandType.StoredProcedure;
+                SqlCommand cmd = new SqlCommand(storeProcedure, GetSqlConnection())
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
 
                 cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
 
@@ -158,8 +166,10 @@ namespace EpsiLibrary2019.DataAccess
             try
             {
                 Open();
-                SqlCommand cmd = new SqlCommand("DatabaseExistsDB", GetSqlConnection());
-                cmd.CommandType = CommandType.StoredProcedure;
+                SqlCommand cmd = new SqlCommand("DatabaseExistsDB", GetSqlConnection())
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
 
                 cmd.Parameters.Add(new SqlParameter("@dbName", databaseName));
                 SqlParameter exists = cmd.Parameters.Add("@exists", SqlDbType.Int);
@@ -191,8 +201,10 @@ namespace EpsiLibrary2019.DataAccess
             {
                 Open();
 
-                SqlCommand cmd = new SqlCommand("DatabaseListDatabases", GetSqlConnection());
-                cmd.CommandType = CommandType.StoredProcedure;
+                SqlCommand cmd = new SqlCommand("DatabaseListDatabases", GetSqlConnection())
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
 
                 cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
                 SqlDataReader reader = cmd.ExecuteReader();
@@ -222,8 +234,10 @@ namespace EpsiLibrary2019.DataAccess
                 Open();
 
                 // Création de la table
-                SqlCommand cmd = new SqlCommand("DatabaseCreateDatabase", GetSqlConnection());
-                cmd.CommandType = CommandType.StoredProcedure;
+                SqlCommand cmd = new SqlCommand("DatabaseCreateDatabase", GetSqlConnection())
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
 
                 cmd.Parameters.Add(new SqlParameter("@dbName", databaseName));
                 cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
@@ -249,8 +263,10 @@ namespace EpsiLibrary2019.DataAccess
 
                 // Suppression de la table
                 string storeProcedure = "DatabaseRemoveDatabase";
-                SqlCommand cmd = new SqlCommand(storeProcedure, GetSqlConnection());
-                cmd.CommandType = CommandType.StoredProcedure;
+                SqlCommand cmd = new SqlCommand(storeProcedure, GetSqlConnection())
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
 
                 cmd.Parameters.Add(new SqlParameter("@dbName", databaseName));
                 cmd.ExecuteNonQuery();
@@ -281,8 +297,10 @@ namespace EpsiLibrary2019.DataAccess
                 if (!String.IsNullOrWhiteSpace(password))
                 {
                     // Ajout de l'utilisateur sur le serveur
-                    cmd = new SqlCommand("DatabaseAddOrUpdateUser", GetSqlConnection());
-                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd = new SqlCommand("DatabaseAddOrUpdateUser", GetSqlConnection())
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    };
 
                     cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
                     cmd.Parameters.Add(new SqlParameter("@password", password));
@@ -290,17 +308,13 @@ namespace EpsiLibrary2019.DataAccess
 
 
                     // Les droits pour l'utilisateur
-                    string sqlserverRights = "";
-                    switch (groupType)
-                    {
-                        case EpsiLibrary2019.DataAccess.DatabaseValues.ADMINISTRATEUR: sqlserverRights = "ALTER, BACKUP DATABASE, CREATE DEFAULT, CREATE FUNCTION, CREATE PROCEDURE, CREATE RULE, CREATE SCHEMA, CREATE SYNONYM, CREATE TABLE, CREATE TYPE, CREATE VIEW, DELETE, EXECUTE, INSERT, SELECT, UPDATE, VIEW DEFINITION"; break;
-                        case EpsiLibrary2019.DataAccess.DatabaseValues.CRUD: sqlserverRights = "SELECT, UPDATE, INSERT, DELETE, EXECUTE"; break;
-                        case EpsiLibrary2019.DataAccess.DatabaseValues.SELECT: sqlserverRights = "SELECT"; break;
-                    }
+                    string sqlserverRights = GetServerRights(groupType);
 
                     // Ajout de l'utilisateur pour la base de données
-                    cmd = new SqlCommand("DatabaseAddContributor", GetSqlConnection());
-                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd = new SqlCommand("DatabaseAddContributor", GetSqlConnection())
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    };
 
                     cmd.Parameters.Add(new SqlParameter("@dbName", databaseName));
                     cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
@@ -327,16 +341,12 @@ namespace EpsiLibrary2019.DataAccess
                 SqlCommand cmd;
 
                 // Modification des droits
-                string sqlserverRights = "";
-                switch (groupType)
-                {
-                    case EpsiLibrary2019.DataAccess.DatabaseValues.ADMINISTRATEUR: sqlserverRights = "ALTER, BACKUP DATABASE, CREATE DEFAULT, CREATE FUNCTION, CREATE PROCEDURE, CREATE RULE, CREATE SCHEMA, CREATE SYNONYM, CREATE TABLE, CREATE TYPE, CREATE VIEW, DELETE, EXECUTE, INSERT, SELECT, UPDATE, VIEW DEFINITION"; break;
-                    case EpsiLibrary2019.DataAccess.DatabaseValues.CRUD: sqlserverRights = "SELECT, UPDATE, INSERT, DELETE, EXECUTE"; break;
-                    case EpsiLibrary2019.DataAccess.DatabaseValues.SELECT: sqlserverRights = "SELECT"; break;
-                }
+                string sqlserverRights = GetServerRights(groupType);
 
-                cmd = new SqlCommand("DatabaseAddOrUpdateContributorGroupType", GetSqlConnection());
-                cmd.CommandType = CommandType.StoredProcedure;
+                cmd = new SqlCommand("DatabaseAddOrUpdateContributorGroupType", GetSqlConnection())
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
 
                 cmd.Parameters.Add(new SqlParameter("@dbName", databaseName));
                 cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
@@ -348,8 +358,10 @@ namespace EpsiLibrary2019.DataAccess
                 if (!String.IsNullOrWhiteSpace(password))
                 {
                     // Ajout de l'utilisateur
-                    cmd = new SqlCommand("DatabaseAddOrUpdateUser", GetSqlConnection());
-                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd = new SqlCommand("DatabaseAddOrUpdateUser", GetSqlConnection())
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    };
 
                     cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
                     cmd.Parameters.Add(new SqlParameter("@password", password));
@@ -375,8 +387,10 @@ namespace EpsiLibrary2019.DataAccess
                 Open();
 
                 string storeProcedure = "DatabaseRemoveContributor";
-                SqlCommand cmd = new SqlCommand(storeProcedure, GetSqlConnection());
-                cmd.CommandType = CommandType.StoredProcedure;
+                SqlCommand cmd = new SqlCommand(storeProcedure, GetSqlConnection())
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
 
                 cmd.Parameters.Add(new SqlParameter("@dbName", databaseName));
                 cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
@@ -399,6 +413,22 @@ namespace EpsiLibrary2019.DataAccess
             return userLogin.ToLower();
         }
 
+        public string GetServerRights(int groupType)
+        {
+            string serverRights = "";
+            switch (groupType)
+            {
+                case EpsiLibrary2019.DataAccess.DatabaseValues.ADMINISTRATEUR:
+                case EpsiLibrary2019.DataAccess.DatabaseValues.MODIFICATION:
+                    serverRights = "ALTER, BACKUP DATABASE, CREATE DEFAULT, CREATE FUNCTION, CREATE PROCEDURE, CREATE RULE, CREATE SCHEMA, CREATE SYNONYM, CREATE TABLE, CREATE TYPE, CREATE VIEW, DELETE, EXECUTE, INSERT, SELECT, UPDATE, VIEW DEFINITION"; break;
+                case EpsiLibrary2019.DataAccess.DatabaseValues.ECRITURE: serverRights = "SELECT, UPDATE, INSERT, DELETE, EXECUTE"; break;
+                case EpsiLibrary2019.DataAccess.DatabaseValues.LECTURE: serverRights = "SELECT"; break;
+            }
+
+            return serverRights;
+        }
+
         #endregion
     }
+
 }

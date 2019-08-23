@@ -27,6 +27,15 @@ namespace EpsiLibrary2019.Model
 
         public int GroupType { get; set; }
 
+        /*
+         * Propriétés ajoutées
+         */
+        [NotMapped]
+        public bool CanBeDeleted { get; set; }
+        [NotMapped]
+        public bool CanBeUpdated { get; set; }
+
+
         [Required]
         [StringLength(30)]
         public string AddedByUserLogin { get; set; }

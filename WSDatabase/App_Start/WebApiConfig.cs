@@ -11,6 +11,10 @@ namespace WSDatabase
         {
             // Configuration et services API Web
 
+            // Autoriser les demandes externes
+            var cors = new System.Web.Http.Cors.EnableCorsAttribute("*", "*", "*");
+            config.EnableCors(cors);
+
             // Itinéraires de l'API Web
             config.MapHttpAttributeRoutes();
 

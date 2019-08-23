@@ -10,6 +10,8 @@ namespace EpsiLibrary2019.Model
     {
         public int DbId { get; set; }
         public string SqlLogin { get; set; }
+        public string UserLogin { get; set; }
+        public string UserFullName { get; set; }
         public string Password { get; set; }
         public int GroupType { get; set; }
 
