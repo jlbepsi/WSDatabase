@@ -305,22 +305,21 @@ namespace EpsiLibrary2019.DataAccess
                     cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
                     cmd.Parameters.Add(new SqlParameter("@password", password));
                     cmd.ExecuteNonQuery();
-
-
-                    // Les droits pour l'utilisateur
-                    string sqlserverRights = GetServerRights(groupType);
-
-                    // Ajout de l'utilisateur pour la base de données
-                    cmd = new SqlCommand("DatabaseAddContributor", GetSqlConnection())
-                    {
-                        CommandType = CommandType.StoredProcedure
-                    };
-
-                    cmd.Parameters.Add(new SqlParameter("@dbName", databaseName));
-                    cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
-                    cmd.Parameters.Add(new SqlParameter("@userRights", sqlserverRights));
-                    cmd.ExecuteNonQuery();
                 }
+
+                // Les droits pour l'utilisateur
+                string sqlserverRights = GetServerRights(groupType);
+
+                // Ajout de l'utilisateur pour la base de données
+                cmd = new SqlCommand("DatabaseAddContributor", GetSqlConnection())
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+
+                cmd.Parameters.Add(new SqlParameter("@dbName", databaseName));
+                cmd.Parameters.Add(new SqlParameter("@login", sqlLogin));
+                cmd.Parameters.Add(new SqlParameter("@userRights", sqlserverRights));
+                cmd.ExecuteNonQuery();
             }
             catch (SqlException ex)
             {

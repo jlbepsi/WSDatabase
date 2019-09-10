@@ -303,8 +303,9 @@ namespace EpsiLibrary2019.BusinessLogic
                 DbId = groupUserModel.DbId,
                 SqlLogin = groupUserModel.SqlLogin,
                 AddedByUserLogin = userLogin,
-                GroupType = groupUserModel.GroupType
-
+                GroupType = groupUserModel.GroupType,
+                UserLogin = groupUserModel.UserLogin,
+                UserFullName = groupUserModel.UserFullName
             };
 
             try
