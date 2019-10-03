@@ -160,7 +160,7 @@ namespace EpsiLibrary2019.BusinessLogic
                     return null;
 
                 // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
-                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale);
+                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale, databaseServerName.PortLocal);
                 // Création du login SQL
                 databaseServerUser.SqlLogin = management.MakeSqlLogin(serverAccount.UserLogin);
                 // Ajout du login SQL sur le serveur
@@ -215,7 +215,7 @@ namespace EpsiLibrary2019.BusinessLogic
             try
             {
                 // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
-                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale);
+                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale, databaseServerName.PortLocal);
                 // Modification du mot de passe du login SQL sur le serveur
                 management.AddOrUpdateUser(databaseServerUser.SqlLogin, serverAccount.Password);
             }
@@ -250,19 +250,6 @@ namespace EpsiLibrary2019.BusinessLogic
 
             try
             {
-                // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
-                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale);
-                // Modification du mot de passe du login SQL sur le serveur
-                management.RemoveUser(userLogin);
-            }
-            catch (Exception ex)
-            {
-                LogManager.GetLogger().Error(ex);
-                throw new DatabaseException(String.Format("Erreur dans la suppression du compte utilisateur {0} sur le serveur '{1}'", userLogin, serverName), ex);
-            }
-
-            try
-            {
                 databaseServerUser = this.db.DatabaseServerUsers.SingleOrDefault(su => su.ServerId == serverId && su.UserLogin.Equals(userLogin, StringComparison.InvariantCultureIgnoreCase));
                 if (databaseServerUser == null)
                 {
@@ -276,6 +263,19 @@ namespace EpsiLibrary2019.BusinessLogic
             {
                 LogManager.GetLogger().Error(ex);
                 throw new DatabaseException(String.Format("Erreur dans la suppression du compte utilisateur {0} sur le serveur '{1}' dans le référentiel", userLogin, serverName));
+            }
+
+            try
+            {
+                // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
+                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale, databaseServerName.PortLocal);
+                // Modification du mot de passe du login SQL sur le serveur
+                management.RemoveUser(databaseServerUser.SqlLogin);
+            }
+            catch (Exception ex)
+            {
+                LogManager.GetLogger().Error(ex);
+                throw new DatabaseException(String.Format("Erreur dans la suppression du compte utilisateur {0} sur le serveur '{1}'", userLogin, serverName), ex);
             }
 
             return databaseServerUser;

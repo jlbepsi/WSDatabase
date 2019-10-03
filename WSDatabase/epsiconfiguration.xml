@@ -25,7 +25,7 @@
         <connectionstring value="server={0};uid=extranetUser;pwd=citK19c3;database=ServiceEPSI_SQLServer;Connect Timeout=10" />
       </sqlserver>
       <mysql>
-        <connectionstring value="server={0};user=root;password=dbZ51aY;database=mysql;port=3306;" />
+        <connectionstring value="server={0};user=extranetUser;password=dbZ51#aY;database=mysql;port=3306;" />
       </mysql>
       <oracle>
         <connectionstring value="user id=SYS; password=dbZ51#aY;DBA Privilege=SYSDBA;data source=(DESCRIPTION =(ADDRESS = (PROTOCOL = TCP)(HOST = {0})(PORT = 1521))(CONNECT_DATA = (SID = bdaolap)))" />

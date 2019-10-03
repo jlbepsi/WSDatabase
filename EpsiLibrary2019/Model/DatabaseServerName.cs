@@ -32,6 +32,9 @@ namespace EpsiLibrary2019.Model
         public string IPLocale { get; set; }
 
         [Required]
+        public int PortLocal { get; set; }
+
+        [Required]
         [StringLength(50)]
         public string NomDNS { get; set; }
 

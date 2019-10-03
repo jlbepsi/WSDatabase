@@ -99,7 +99,7 @@ namespace EpsiLibrary2019.BusinessLogic
                     return null;
 
                 // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
-                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale);
+                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale, databaseServerName.PortLocal);
                 if (management == null)
                     return null;
 
@@ -286,7 +286,7 @@ namespace EpsiLibrary2019.BusinessLogic
                 serverName = databaseServerName.Name;
 
                 // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
-                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale);
+                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale, databaseServerName.PortLocal);
                 if (management == null)
                     return null;
 
@@ -385,7 +385,7 @@ namespace EpsiLibrary2019.BusinessLogic
                 serverName = databaseServerName.Name;
 
                 // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
-                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale);
+                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale, databaseServerName.PortLocal);
                 if (management == null)
                     return false;
 
@@ -463,7 +463,7 @@ namespace EpsiLibrary2019.BusinessLogic
                     return false;
 
                 // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
-                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale);
+                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale, databaseServerName.PortLocal);
                 if (management == null)
                     return false;
 
@@ -514,7 +514,7 @@ namespace EpsiLibrary2019.BusinessLogic
                     return false;
 
                 // Obtention du serveur réel : MySQL, SQL Server, ... avec son adresse IP
-                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale);
+                DatabaseManagement management = DatabaseManagement.CreateDatabaseManagement(databaseServerName.Code, databaseServerName.IPLocale, databaseServerName.PortLocal);
                 if (management == null)
                     return false;
 

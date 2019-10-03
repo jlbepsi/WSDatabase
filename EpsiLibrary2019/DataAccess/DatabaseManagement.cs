@@ -68,8 +68,7 @@ namespace EpsiLibrary2019.DataAccess
         #endregion
 
 
-        /** TODO : A compléter */
-        public static DatabaseManagement CreateDatabaseManagement(string serverCode, string adresseIP)
+        public static DatabaseManagement CreateDatabaseManagement(string serverCode, string adresseIP, int port)
         {
             serverCode = serverCode.Trim();
 
@@ -82,17 +81,17 @@ namespace EpsiLibrary2019.DataAccess
             if (serverCode.Equals(DatabaseValues.MYSQL_TYPE, StringComparison.InvariantCultureIgnoreCase))
             {
                 // On fixe l'adresse IP du serveur
-                string connectionString = string.Format(config.GetValue("database.server.mysql.connectionstring"), adresseIP);
+                string connectionString = string.Format(config.GetValue("database.server.mysql.connectionstring"), adresseIP, port);
                 return new DatabaseManagementMySQL(connectionString);
             }
             else if (serverCode.Equals(DatabaseValues.SQLSERVER_TYPE, StringComparison.InvariantCultureIgnoreCase))
             {
-                string connectionString = string.Format(config.GetValue("database.server.sqlserver.connectionstring"), adresseIP);
+                string connectionString = string.Format(config.GetValue("database.server.sqlserver.connectionstring"), adresseIP, port);
                 return new DatabaseManagementSQLServer(connectionString);
             }
             else if (serverCode.Equals(DatabaseValues.ORACLE_TYPE, StringComparison.InvariantCultureIgnoreCase))
             {
-                string connectionString = string.Format(config.GetValue("database.server.oracle.connectionstring"), adresseIP);
+                string connectionString = string.Format(config.GetValue("database.server.oracle.connectionstring"), adresseIP, port);
                 return new DatabaseManagementOracle(connectionString);
             }
 

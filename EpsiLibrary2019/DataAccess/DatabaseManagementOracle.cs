@@ -217,6 +217,9 @@ namespace EpsiLibrary2019.DataAccess
                 sqlLogin = sqlLogin.Substring(0, indexPoint) + sqlLogin.Substring(indexPoint + 1);
             }
 
+            // Ajout du préfixe C##
+            // Voir http://www.dba-oracle.com/t_ora_65096_create_user_12c_without_c_prefix.htm
+            sqlLogin = "C##" + sqlLogin;
             return sqlLogin.ToUpper();
         }
 

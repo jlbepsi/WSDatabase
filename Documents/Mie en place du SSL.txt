@@ -1,0 +1,11 @@
+
+# Mise en place du SSL sur IIS
+https://docs.microsoft.com/fr-fr/aspnet/web-api/overview/security/working-with-ssl-in-web-api
+# Génération du certificat ws_database.pfx
+https://docs.microsoft.com/en-us/iis/manage/configuring-security/how-to-set-up-ssl-on-iis#IISManager
+
+# Génération des fichers crt et key pour Linux
+
+openssl pkcs12 -in ws_database.pfx -nocerts -out ws_database.key -nodes
+openssl pkcs12 -in ws_database.pfx -clcerts -nokeys -out ws_database.crt
+
